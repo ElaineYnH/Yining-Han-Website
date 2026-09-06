@@ -3,7 +3,7 @@ project:
   output-dir: docs
 
 website:
-  title: "Student Name"
+  title: "Yining Han"
 
   navbar:
     left:
@@ -15,7 +15,7 @@ website:
 
   page-footer:
     center: |
-      © 2026 Student Name
+      © 2026 Yining Han.
     left: |
       ![](/images/UniversityofPennsylvania_FullLogo_RGB.png){width=100px}
 
