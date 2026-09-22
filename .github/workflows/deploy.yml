@@ -32,6 +32,12 @@ jobs:
           packages: |
             any::knitr
             any::rmarkdown
+            any::rvest
+            any::httr2
+            any::dplyr
+            any::stringr
+            any::ggplot2
+            any::scales
 
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
