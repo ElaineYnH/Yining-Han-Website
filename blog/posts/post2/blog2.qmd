@@ -1,0 +1,268 @@
+---
+title: "Pay Per Ride or Buy a Pass? A SEPTA Break-Even Guide"
+author: "Yining Han"
+date: 2026-09-21
+categories:
+  - web scraping
+  - transportation
+  - personal finance
+description: "I scrape SEPTA's fare page to find the exact number of Bus and Metro trips that makes each pass worth buying."
+format:
+  html:
+    toc: true
+    code-fold: true
+    code-tools: true
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+```{r}
+#| label: setup-and-scrape
+
+library(rvest)
+library(httr2)
+library(dplyr)
+library(stringr)
+library(ggplot2)
+library(scales)
+library(knitr)
+
+fare_url <- "https://wwww.septa.org/fares/"
+snapshot_path <- "data/septa_fares_snapshot.csv"
+
+scrape_septa_fares <- function(url) {
+  # This project makes only one page request. The short pause is an
+  # additional courtesy if the function is sourced in a larger workflow.
+  Sys.sleep(0.5)
+
+  page <- request(url) |>
+    req_user_agent("Academic-Web-Scraping-Project/1.0") |>
+    req_timeout(30) |>
+    req_perform() |>
+    resp_body_raw() |>
+    read_html()
+
+  heading_text <- page |>
+    html_elements("h2") |>
+    html_text2()
+
+  pay_per_ride_text <- heading_text[
+    str_detect(heading_text, "^\\$[0-9]+(?:\\.[0-9]+)?/Trip$")
+  ]
+
+  list_text <- page |>
+    html_elements("li") |>
+    html_text2()
+
+  pass_text <- list_text |>
+    str_subset(
+      "One Day Convenience Pass|Three Day Convenience Pass|Weekly TransPass\\+|Monthly TransPass\\+"
+    ) |>
+    unique()
+
+  if (length(pay_per_ride_text) == 0 || length(pass_text) != 4) {
+    stop("The SEPTA page structure has changed; update the selectors.")
+  }
+
+  get_price <- function(x) {
+    as.numeric(str_remove(str_extract(x, "\\$[0-9]+(?:\\.[0-9]+)?"), "\\$"))
+  }
+
+  pass_data <- tibble(
+    product = case_when(
+      str_detect(pass_text, "One Day") ~ "One Day Convenience Pass",
+      str_detect(pass_text, "Three Day") ~ "Three Day Convenience Pass",
+      str_detect(pass_text, "Weekly") ~ "Weekly TransPass+",
+      str_detect(pass_text, "Monthly") ~ "Monthly TransPass+"
+    ),
+    price = get_price(pass_text),
+    validity = case_when(
+      str_detect(pass_text, "One Day") ~ "One day",
+      str_detect(pass_text, "Three Day") ~ "Three-day period",
+      str_detect(pass_text, "Weekly") ~ "One week",
+      str_detect(pass_text, "Monthly") ~ "One month"
+    )
+  )
+
+  bind_rows(
+    tibble(
+      product = "Pay per ride",
+      price = get_price(pay_per_ride_text[[1]]),
+      validity = "One paid Bus or Metro trip"
+    ),
+    pass_data
+  ) |>
+    mutate(
+      scraped_on = as.character(Sys.Date()),
+      source_url = url
+    )
+}
+
+# Keep a dated snapshot so the post remains reproducible if the live page is
+# temporarily unavailable. A successful scrape refreshes that snapshot.
+fares_live <- tryCatch(
+  scrape_septa_fares(fare_url),
+  error = function(e) NULL
+)
+
+if (is.null(fares_live)) {
+  fares <- read.csv(snapshot_path, stringsAsFactors = FALSE)
+  data_status <- "the repository snapshot"
+} else {
+  fares <- fares_live
+  write.csv(fares, snapshot_path, row.names = FALSE)
+  data_status <- "a live scrape"
+}
+
+data_date <- max(as.Date(fares$scraped_on))
+
+ride_fare <- fares |>
+  filter(product == "Pay per ride") |>
+  pull(price)
+
+break_even <- fares |>
+  filter(product != "Pay per ride") |>
+  mutate(
+    # Work in integer cents so an exact tie is not distorted by
+    # floating-point rounding.
+    trips_to_save = round(price * 100) %/% round(ride_fare * 100) + 1,
+    pay_per_ride_cost = trips_to_save * ride_fare,
+    savings_at_threshold = pay_per_ride_cost - price
+  )
+
+get_threshold <- function(pass_name) {
+  break_even |>
+    filter(product == pass_name) |>
+    pull(trips_to_save)
+}
+
+one_day_threshold <- get_threshold("One Day Convenience Pass")
+three_day_threshold <- get_threshold("Three Day Convenience Pass")
+weekly_threshold <- get_threshold("Weekly TransPass+")
+monthly_threshold <- get_threshold("Monthly TransPass+")
+monthly_tie <- break_even |>
+  filter(product == "Monthly TransPass+") |>
+  pull(price) / ride_fare
+```
+
+SEPTA offers a simple choice that is surprisingly easy to get wrong: pay for each Bus or Metro trip, or buy a pass in advance. A pass feels economical because it offers many trips for a fixed price, but it can cost more when a rider does not use it enough. I therefore ask a practical question: **how many paid trips make each SEPTA pass cheaper than paying per ride?** The answer can guide commuters, students, and visitors before they load a SEPTA Key card.
+
+## Data and responsible scraping
+
+I collected the prices from SEPTA's public [Fare Information page](https://www.septa.org/fares/). The data used here are dated `r data_date`. SEPTA serves the readable static HTML at its own `wwww.septa.org` subdomain, while the reader-facing link uses the usual `www` address. The page requires no account, paywall, CAPTCHA, or other access control. When I accessed it, its `robots.txt` permitted the extension-free fare page. My script identifies itself with a descriptive user agent, pauses briefly, and makes only one request. It then uses `rvest` to extract the pay-per-ride heading and the four Bus and Metro pass entries. The analysis currently uses `r data_status`; the dated CSV snapshot in the repository is the fallback if SEPTA is temporarily unavailable.
+
+The scraper selects the relevant `<h2>` and `<li>` elements, cleans dollar signs and descriptive text, and converts each price to a number. I also included checks that stop the live scrape if SEPTA changes the page structure, rather than silently returning incorrect data.
+
+## Turning prices into a decision rule
+
+For a pass costing $P$ and a pay-per-ride fare of $f$, the first trip count at which the pass is *strictly* cheaper is
+
+$$
+\left\lfloor \frac{P}{f} \right\rfloor + 1.
+$$
+
+This counts **paid trips**, not every vehicle boarded. SEPTA currently allows up to two free transfers within two hours when riders use the same Key card or contactless card, so a bus-to-Metro journey with a free transfer still counts as one paid trip.
+
+```{r}
+#| label: tbl-break-even
+#| tbl-cap: "The first number of paid trips at which each pass costs less than pay per ride."
+
+break_even |>
+  transmute(
+    Pass = product,
+    Price = dollar(price),
+    `First trip count where pass is cheaper` = trips_to_save,
+    `Savings at that count` = dollar(savings_at_threshold)
+  ) |>
+  kable(align = c("l", "r", "r", "r"))
+```
+
+The short-period passes have intuitive thresholds. The one-day pass pays off on paid trip `r one_day_threshold`, while the three-day pass pays off on trip `r three_day_threshold`. The weekly result is more surprising: a standard five-day round-trip commute is 10 paid trips and costs `r dollar(10 * ride_fare)`, which is still `r dollar(break_even$price[break_even$product == "Weekly TransPass+"] - 10 * ride_fare)` less than the weekly pass. The pass first wins at `r weekly_threshold` trips, so one additional paid trip during the week changes the decision.
+
+The monthly pass has an exact tie at `r monthly_tie` trips. A rider making 20 round-trip commute days pays `r dollar(40 * ride_fare)` either way; the pass begins saving money on trip `r monthly_threshold`.
+
+```{r}
+#| label: fig-monthly-break-even
+#| fig-cap: "The monthly pass and pay-per-ride cost lines cross at the break-even point."
+#| fig-width: 7
+#| fig-height: 4.5
+
+monthly_price <- break_even |>
+  filter(product == "Monthly TransPass+") |>
+  pull(price)
+
+monthly_costs <- tibble(
+  paid_trips = 0:60,
+  pay_per_ride = paid_trips * ride_fare,
+  monthly_pass = monthly_price
+)
+
+monthly_plot <- ggplot(monthly_costs, aes(x = paid_trips)) +
+  geom_line(
+    aes(y = pay_per_ride, color = "Pay per ride"),
+    linewidth = 1.1
+  ) +
+  geom_line(
+    aes(y = monthly_pass, color = "Monthly pass"),
+    linewidth = 1.1
+  ) +
+  geom_vline(
+    xintercept = monthly_price / ride_fare,
+    color = "#666666",
+    linetype = "dotted"
+  ) +
+  annotate(
+    "point",
+    x = monthly_price / ride_fare,
+    y = monthly_price,
+    size = 2.8
+  ) +
+  annotate(
+    "text",
+    x = monthly_price / ride_fare + 1.5,
+    y = monthly_price - 9,
+    label = paste0("Equal at ", monthly_tie, " trips"),
+    hjust = 0
+  ) +
+  scale_y_continuous(labels = label_dollar()) +
+  scale_color_manual(
+    values = c("Pay per ride" = "#1f77b4", "Monthly pass" = "#d95f02")
+  ) +
+  labs(
+    x = "Paid Bus or Metro trips in one month",
+    y = "Total fare cost",
+    color = NULL
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "top")
+
+dir.create("figures", showWarnings = FALSE)
+ggsave(
+  "figures/monthly_break_even.png",
+  monthly_plot,
+  width = 7,
+  height = 4.5,
+  dpi = 160
+)
+
+monthly_plot
+```
+
+## Recommendation
+
+The actionable rule is simple: **pay per ride when travel is irregular; buy a pass only when the expected paid-trip count reaches its threshold.** For Bus and Metro travel alone, a five-day round-trip commuter should pay per ride for a 10-trip week, but choose the weekly pass at `r weekly_threshold` or more trips. A monthly commuter should buy the pass at `r monthly_threshold` or more trips, while a visitor making at least `r one_day_threshold` paid trips in one day should choose the one-day pass.
+
+This comparison is deliberately conservative. Passes can include Regional Rail privileges, and some riders value cost certainty even at a small premium. Discounts and special programs may also change the calculation. Still, the central takeaway remains: a fixed-price pass is not automatically a bargain. Count paid trips first, remember that free transfers do not add fares, and rerun the scraper whenever SEPTA updates its prices.
+
+## Reproducibility
+
+All reported values, the table, and the figure are generated from the scraped data. Package and platform details are recorded below.
+
+```{r}
+#| label: session-info
+#| code-fold: true
+
+sessionInfo()
+```
