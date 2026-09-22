@@ -32,6 +32,8 @@ library(knitr)
 fare_url <- "https://wwww.septa.org/fares/"
 snapshot_path <- "data/septa_fares_snapshot.csv"
 
+dir.create(dirname(snapshot_path), recursive = TRUE, showWarnings = FALSE)
+
 scrape_septa_fares <- function(url) {
   # This project makes only one page request. The short pause is an
   # additional courtesy if the function is sourced in a larger workflow.
