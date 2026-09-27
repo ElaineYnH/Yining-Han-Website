@@ -1,0 +1,148 @@
+---
+title: "Did Education Protect Workers During the Pandemic?"
+author: "Yining Han"
+date: 2026-09-27
+categories: [Labor market, Data visualization, CPS]
+format: html
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r}
+#| label: setup
+#| include: false
+library(ggplot2)
+
+locations <- c("data/cps_education_summary.csv",
+               "blog/posts/post3/data/cps_education_summary.csv")
+found <- locations[file.exists(locations)]
+if (length(found) == 0) {
+  stop("Run prepare_cps.R on an IPUMS CPS extract before rendering this post.")
+}
+
+results <- read.csv(found[1], stringsAsFactors = FALSE)
+required <- c("year", "education", "population", "employed", "unemployed",
+              "out_lf", "unemployment_rate", "employment_pop_rate",
+              "participation_rate")
+stopifnot(all(required %in% names(results)), nrow(results) == 12L,
+          setequal(results$year, c(2019, 2020, 2025)),
+          all(is.finite(results$unemployment_rate)),
+          all(abs(results$population - results$employed - results$unemployed -
+                  results$out_lf) < 1e-5 * results$population))
+
+groups <- c("Less than high school", "High school diploma",
+            "Some college / associate", "Bachelor's or higher")
+results$education <- factor(results$education, levels = groups)
+stopifnot(!anyNA(results$education))
+
+pct <- function(x) sprintf("%.1f%%", 100 * x)
+pp <- function(x) sprintf("%.1f", 100 * x)
+value <- function(year, group, column) {
+  x <- results[results$year == year & results$education == group, column]
+  stopifnot(length(x) == 1L)
+  x
+}
+
+gap2025 <- value(2025, "Bachelor's or higher", "employment_pop_rate") -
+  value(2025, "Less than high school", "employment_pop_rate")
+
+colors <- c("Less than high school" = "#BC4B51",
+            "High school diploma" = "#DC8840",
+            "Some college / associate" = "#3C8990",
+            "Bachelor's or higher" = "#415DA0")
+plot_theme <- theme_minimal(base_size = 12) +
+  theme(panel.grid.minor = element_blank(), legend.position = "bottom",
+        plot.title.position = "plot", plot.caption = element_text(hjust = 0))
+
+figure_dir <- file.path(dirname(found[1]), "..", "figures")
+dir.create(figure_dir, recursive = TRUE, showWarnings = FALSE)
+```
+
+In April 2020, the first wave of COVID-19 abruptly changed the U.S. labor market. Did workers with different levels of education experience the same disruption, and what did their position look like five years later? I use [IPUMS CPS](https://cps.ipums.org/cps/) individual records from **April 2019, April 2020, and April 2025** to compare adults ages 25–64. Holding the month fixed makes the snapshots more comparable, though these are descriptive comparisons, not estimates of the causal effect of a degree.
+
+## 1. Who was counted as unemployed?
+
+The unemployment rate is the share of the *labor force* that is unemployed. A person who is neither employed nor seeking work is outside that denominator. Figure 1 compares four education groups across the three Aprils. It shows the pandemic shock and whether the differences across groups narrowed afterward.
+
+```{r}
+#| label: fig-unemployment
+#| fig-cap: "Unemployment among adults ages 25–64, April of each year. Weighted IPUMS CPS estimates; denominator is the labor force within each group."
+p1 <- ggplot(results, aes(year, unemployment_rate, color = education,
+                          group = education)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 2.8) +
+  scale_x_continuous(breaks = c(2019, 2020, 2025)) +
+  scale_y_continuous(labels = scales::label_percent(accuracy = 1),
+                     limits = c(0, NA), expand = expansion(mult = c(0, .08))) +
+  scale_color_manual(values = colors, name = "Education") +
+  labs(x = NULL, y = "Unemployed / labor force",
+       title = "The labor-market shock differed by education") +
+  plot_theme
+print(p1)
+ggsave(file.path(figure_dir, "unemployment.png"), p1,
+       width = 8.5, height = 5, dpi = 180)
+```
+
+Among adults without a high-school diploma, unemployment rose from **`r pct(value(2019, "Less than high school", "unemployment_rate"))`** in 2019 to **`r pct(value(2020, "Less than high school", "unemployment_rate"))`** in 2020, an increase of **`r pp(value(2020, "Less than high school", "unemployment_rate") - value(2019, "Less than high school", "unemployment_rate"))` percentage points**. For adults with a bachelor's degree or more, the increase was **`r pp(value(2020, "Bachelor's or higher", "unemployment_rate") - value(2019, "Bachelor's or higher", "unemployment_rate"))` points**, from **`r pct(value(2019, "Bachelor's or higher", "unemployment_rate"))`** to **`r pct(value(2020, "Bachelor's or higher", "unemployment_rate"))`**. These are weighted estimates, not percentages of the extract's rows. The lines connect three snapshots, not every intervening month.
+
+## 2. How many adults actually had jobs?
+
+Unemployment alone does not describe everyone who lost work. The employment-to-population ratio counts employed people as a share of *all* adults in each group, including those outside the labor force. Figure 2 puts the pandemic decline and the later level on that broader denominator.
+
+```{r}
+#| label: fig-employment
+#| fig-cap: "Employment-to-population ratios among adults ages 25–64, April of each year. Weighted IPUMS CPS estimates."
+p2 <- ggplot(results, aes(year, employment_pop_rate, color = education,
+                          group = education)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 2.8) +
+  scale_x_continuous(breaks = c(2019, 2020, 2025)) +
+  scale_y_continuous(labels = scales::label_percent(accuracy = 1),
+                     limits = c(0, 1)) +
+  scale_color_manual(values = colors, name = "Education") +
+  labs(x = NULL, y = "Employed / population",
+       title = "A broader measure: the share of adults working") +
+  plot_theme
+print(p2)
+ggsave(file.path(figure_dir, "employment.png"), p2,
+       width = 8.5, height = 5, dpi = 180)
+```
+
+The 2019–20 employment share fell by **`r pp(value(2019, "High school diploma", "employment_pop_rate") - value(2020, "High school diploma", "employment_pop_rate"))` points** for high-school graduates, the largest drop among these groups, versus **`r pp(value(2019, "Bachelor's or higher", "employment_pop_rate") - value(2020, "Bachelor's or higher", "employment_pop_rate"))` points** for the bachelor's-plus group. By April 2025, **`r pct(value(2025, "Bachelor's or higher", "employment_pop_rate"))`** of the latter group had jobs, compared with **`r pct(value(2025, "Less than high school", "employment_pop_rate"))`** of adults without a high-school diploma: a **`r pp(gap2025)`-point gap**. Differences in occupation, health, and age within this 25–64 range may also contribute.
+
+## 3. Where are adults without jobs in 2025?
+
+Figure 3 separates two kinds of nonemployment: people counted as unemployed and people outside the labor force. Both shares use the *entire population* of each education group as the denominator, so the two bars add up to the share without a job. That distinction helps explain why a low unemployment rate need not imply a high employment rate.
+
+```{r}
+#| label: fig-nonemployment
+#| fig-cap: "Shares of all adults ages 25–64 who were unemployed or outside the labor force in April 2025. Weighted IPUMS CPS estimates."
+latest <- subset(results, year == 2025)
+nonemployment <- rbind(
+  data.frame(education = latest$education, status = "Unemployed",
+             share = latest$unemployed / latest$population),
+  data.frame(education = latest$education, status = "Outside labor force",
+             share = latest$out_lf / latest$population)
+)
+p3 <- ggplot(nonemployment, aes(education, share, fill = status)) +
+  geom_col(width = .65) +
+  coord_flip() +
+  scale_y_continuous(labels = scales::label_percent(accuracy = 1),
+                     limits = c(0, .5), expand = expansion(mult = c(0, .03))) +
+  scale_fill_manual(values = c("Unemployed" = "#BC4B51",
+                               "Outside labor force" = "#768594"), name = NULL) +
+  labs(x = NULL, y = "Share of group population",
+       title = "Nonemployment has two components") +
+  plot_theme
+print(p3)
+ggsave(file.path(figure_dir, "nonemployment.png"), p3,
+       width = 8.5, height = 5, dpi = 180)
+```
+
+In 2025, **`r pct(value(2025, "Less than high school", "out_lf") / value(2025, "Less than high school", "population"))`** of adults without a diploma were outside the labor force, versus **`r pct(value(2025, "Bachelor's or higher", "out_lf") / value(2025, "Bachelor's or higher", "population"))`** of adults with a bachelor's degree or more. Their unemployment rates were only **`r pct(value(2025, "Less than high school", "unemployment_rate"))`** and **`r pct(value(2025, "Bachelor's or higher", "unemployment_rate"))`**, respectively. The unemployment measure alone misses much of the difference in jobholding.
+
+**Takeaway.** Education groups experienced different labor-market outcomes, and the gap visible in employment is wider in meaning than the unemployment rate alone suggests. These snapshots cannot establish that schooling itself caused the difference. They also should not be confused with the official seasonally adjusted headline rate: this analysis uses a specific age group and unadjusted April microdata. In early 2020, some people absent from work were [misclassified as employed rather than unemployed](https://www.bls.gov/blog/2020/update-on-the-misclassification-that-affected-the-unemployment-rate.htm), so the pandemic unemployment estimates may understate the disruption.
+
+**Data and method.** Source: [IPUMS CPS, version 13.0](https://doi.org/10.18128/D030.V13.0), using underlying data from the U.S. Census Bureau and Bureau of Labor Statistics. The extract contains April basic monthly samples in 2019, 2020, and 2025 and variables `YEAR`, `MONTH`, `AGE`, `EDUC`, `EMPSTAT`, and `WTFINL`. I use the IPUMS person-level basic monthly weight `WTFINL` for every numerator and denominator, exclude missing or out-of-universe categories and zero weights, and group education into four levels. The [code and replication steps](README.md) are in the repository; the raw individual records are not republished.
