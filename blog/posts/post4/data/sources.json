@@ -1,0 +1,34 @@
+[
+  {
+    "series_id": "MSPUS",
+    "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=MSPUS&cosd=2019-01-01&coed=2025-12-31",
+    "file": "data/raw/MSPUS.csv",
+    "retrieved_on": "2026-10-04",
+    "sha256": "806e89aa2cc899aec259946b9aeb0be21278ddbb7e1ae1e11d1b406ad2b0c733",
+    "size_bytes": 527
+  },
+  {
+    "series_id": "MORTGAGE30US",
+    "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=MORTGAGE30US&cosd=2019-01-01&coed=2025-12-31",
+    "file": "data/raw/MORTGAGE30US.csv",
+    "retrieved_on": "2026-10-04",
+    "sha256": "9add6293400677f0a53858c19c7b83929e1d35000e4ad66d7ae9ee8d04e154e4",
+    "size_bytes": 5886
+  },
+  {
+    "series_id": "CPIAUCSL",
+    "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=CPIAUCSL&cosd=2019-01-01&coed=2025-12-31",
+    "file": "data/raw/CPIAUCSL.csv",
+    "retrieved_on": "2026-10-04",
+    "sha256": "c3906dbbe493125b3a8b4dc7f4d9f4ac3b509dad39c7f0acbd38182f5d8a7ea2",
+    "size_bytes": 1615
+  },
+  {
+    "series_id": "CES0500000003",
+    "url": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=CES0500000003&cosd=2019-01-01&coed=2025-12-31",
+    "file": "data/raw/CES0500000003.csv",
+    "retrieved_on": "2026-10-04",
+    "sha256": "f7052c86e76ce872dbb17b011cdbf40a3dd6da303ff438697a6a256861b422e7",
+    "size_bytes": 1459
+  }
+]

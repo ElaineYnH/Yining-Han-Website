@@ -1,0 +1,67 @@
+---
+title: "Prices Cooled. Why Is Buying a New Home Still Harder?"
+author: "Yining Han"
+date: 2026-10-04
+description: "Three views of U.S. new-home prices, mortgage rates, and hourly earnings, 2019 Q1–2025 Q3."
+categories: [Housing, Data visualization, FRED]
+image: results/figures/payment_hours.png
+image-alt: "Monthly mortgage payments measured in hours of average earnings, with a comparison holding the interest rate at its 2019 level."
+format: html
+resources:
+  - results/housing_quarterly.csv
+---
+
+A lower house price sounds like good news for buyers. But someone financing a purchase pays both for the house and for borrowing the money. **Did the decline in U.S. new-home prices after 2022 restore workers' 2019 buying power?** I compare prices, earnings, and interest rates from 2019 Q1 to 2025 Q3. A price headline can improve while the monthly budget needed to buy remains stretched.
+
+## 1. Did prices fall relative to purchasing power?
+
+I combine four [FRED](https://fred.stlouisfed.org/) series listed below. Prices cover **new houses sold**. I average monthly CPI and earnings and weekly mortgage rates within each quarter, then join by quarter. Because [October 2025 CPI is missing](https://www.bls.gov/cpi/additional-resources/2025-federal-government-shutdown-impact-cpi-faq.htm), the analysis stops at the last complete 2025 quarter. I do not interpolate missing values.
+
+For Figure 1, I divide prices and hourly earnings by CPI, then set each series to 100 in 2019 Q1. This removes general inflation and makes proportional changes comparable. An index of 110 means a 10% increase in purchasing-power terms.
+
+![Inflation-adjusted median new-home prices and average hourly earnings, each indexed to 100 in 2019 Q1.](results/figures/real_prices_earnings.png){#fig-real}
+
+*Sources: Census/HUD and BLS, via FRED; quarterly calculations described above.*
+
+The nominal median rose from **{{price_start}}** to **{{price_peak}}** in {{peak_quarter}}, then fell **{{price_decline}}%** to **{{price_latest}}** in {{latest_quarter}}. At the endpoint, real prices were **{{real_price_latest}}** on the index, while real hourly earnings were **{{real_earnings_latest}}**. The purchase price relative to earnings had returned close to its starting position. Changing sizes and locations of new homes sold can move this national median. Likewise, the 2020 earnings spike need not mean everyone received a raise: losing lower-paid jobs can raise the workforce average.
+
+## 2. What changed in the cost of borrowing?
+
+![Quarterly averages of the U.S. 30-year fixed mortgage rate, with the 2019 Q1 rate shown as a reference.](results/figures/mortgage_rates.png){#fig-rate}
+
+*Source: Freddie Mac, via FRED; quarterly means of weekly rates. Copyright Freddie Mac; used with attribution.*
+
+The quarterly average mortgage rate fell to **{{rate_low}}%** in {{rate_low_quarter}}, then reached **{{rate_high}}%** in {{rate_high_quarter}}. By {{latest_quarter}}, it was **{{rate_latest}}%**, above the **{{rate_start}}%** starting rate. Each borrowed dollar became more expensive to repay, so buyers could face larger payments even as prices fell. These rates describe new borrowing; an existing fixed-rate loan does not automatically receive the new rate.
+
+## 3. How much work would cover the payment?
+
+I calculate a hypothetical purchase at each quarter's median new-home price, with a **20% down payment** and a **30-year fixed mortgage**. Monthly principal and interest are
+
+\[
+M=0.8P\frac{i}{1-(1+i)^{-360}},
+\]
+
+where \(P\) is the price and \(i\) is the annual percentage rate divided by 1,200. Repayment spans 360 months. Dividing \(M\) by average hourly earnings gives **hours of gross earnings**. Unlike dollar payments, this measure accounts for earnings growth; CPI cancels when both payment and earnings are deflated.
+
+![Hours of average gross earnings needed for a monthly mortgage payment at prevailing rates, compared with the same calculation holding the mortgage rate at its 2019 Q1 level.](results/figures/payment_hours.png){#fig-hours}
+
+*The orange line holds the rate at {{rate_start}}%, with the same prices and earnings. Sources: Census/HUD, Freddie Mac, and BLS, via FRED; author's calculations.*
+
+The monthly payment increased from **{{payment_start}}** to **{{payment_latest}}**, or from **{{hours_start}}** to **{{hours_latest}} hours** of earnings: a **{{hours_change}}%** increase. Keeping the 2019 rate would instead require **{{hours_fixed_latest}} hours** at the endpoint. The **{{hours_rate_gap}}-hour** gap isolates financing costs *within this calculation*. It is not a causal estimate: prices and wages could themselves respond to different interest rates.
+
+The measure excludes taxes, insurance, fees, maintenance, and the upfront down payment. Average private-sector earnings are not household income and can change with workforce composition. Mortgage-survey methodology changed in November 2022. The new-home median and mortgage rates are not seasonally adjusted, so short quarterly movements deserve caution. These limits make the exercise a transparent comparison, not a personalized affordability estimate.
+
+## Data and replication
+
+Snapshots retrieved **{{retrieved_on}}** are included in the [GitHub project folder](https://github.com/ElaineYnH/Yining-Han-Website/tree/main/blog/posts/post4). The [README](https://github.com/ElaineYnH/Yining-Han-Website/blob/main/blog/posts/post4/README.md) gives the commands to reproduce the analysis. The [Python script](https://github.com/ElaineYnH/Yining-Han-Website/blob/main/blog/posts/post4/code/analyze.py) downloads data when requested and generates all figures, [quarterly results](results/housing_quarterly.csv), and numerical statements. FRED can revise historical observations, so the saved snapshots preserve this version.
+
+| Series | Original source | Measurement |
+|---|---|---|
+| [MSPUS](https://fred.stlouisfed.org/series/MSPUS) | U.S. Census Bureau / HUD | Quarterly median new-home price; dollars; not seasonally adjusted |
+| [MORTGAGE30US](https://fred.stlouisfed.org/series/MORTGAGE30US) | Freddie Mac | Weekly 30-year mortgage rate; percent; not seasonally adjusted |
+| [CPIAUCSL](https://fred.stlouisfed.org/series/CPIAUCSL) | U.S. Bureau of Labor Statistics | Monthly consumer price index; seasonally adjusted |
+| [CES0500000003](https://fred.stlouisfed.org/series/CES0500000003) | U.S. Bureau of Labor Statistics | Monthly private-sector average hourly earnings; dollars; seasonally adjusted |
+
+## Takeaway
+
+Prices and earnings moved closer again, but borrowing stayed more expensive. A buyer financing a median-priced new home still needed more hours of average earnings for the monthly payment than in 2019. **A lower sale price alone does not establish that financed homebuying has become affordable again.**
