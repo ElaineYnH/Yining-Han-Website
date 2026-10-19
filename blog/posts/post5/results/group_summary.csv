@@ -1,0 +1,6 @@
+group,description,tracts,households,no_vehicle_households,no_vehicle_pct,share_city_households_pct,share_city_no_vehicle_pct
+high_lower,More car-free / lower income,112,187943,81217,43.21363392,27.66194505,42.83235592
+high_higher,More car-free / higher income,59,108067,43726,40.46193565,15.90558529,23.06029027
+low_lower,Less car-free / lower income,73,136138,25689,18.86982327,20.03714890,13.54790735
+low_higher,Less car-free / higher income,131,229266,31371,13.68323258,33.74397287,16.54448992
+missing,Income unavailable or no households,33,18014,7613,42.26157433,2.65134790,4.01495654

@@ -1,0 +1,26 @@
+{
+  "retrieved_utc": "2026-10-18T04:22:08+00:00",
+  "release": "2024 ACS 5-year estimates (2020\u20132024), 2024 inflation-adjusted dollars",
+  "geography": "Philadelphia County, Pennsylvania; FIPS 42101; 408 census tracts",
+  "sources": [
+    {
+      "source_url": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b08201.dat",
+      "local_file": "data/raw/acsdt5y2024-b08201-philadelphia.dat",
+      "rows": 409,
+      "sha256": "666aae7b65bea4600ae33856df880969004b3fe13da6f4da360001b69d34bec9"
+    },
+    {
+      "source_url": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b19013.dat",
+      "local_file": "data/raw/acsdt5y2024-b19013-philadelphia.dat",
+      "rows": 409,
+      "sha256": "a885a6f36c78868f373094537288ec411c24f4efbdb62a6310b5b4d4deb79cb0"
+    },
+    {
+      "source_url": "https://www2.census.gov/geo/tiger/GENZ2024/shp/cb_2024_42_tract_500k.zip",
+      "local_file": "data/raw/philadelphia_tracts_2024.geojson",
+      "rows": 408,
+      "sha256": "ee42a73b7324b8444f06add07b2e4bd2dcfa8144c76b5b40ed46a8c29b842fec"
+    }
+  ],
+  "notes": "DAT rows are unaltered subsets of official Census files. GeoJSON is a county subset and CRS conversion of official cartographic boundaries."
+}

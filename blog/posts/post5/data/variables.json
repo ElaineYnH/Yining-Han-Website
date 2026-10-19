@@ -1,0 +1,32 @@
+{
+  "B08201_001E": {
+    "label": "Estimate!!Total:",
+    "concept": "Household Size by Vehicles Available",
+    "source": "https://api.census.gov/data/2024/acs/acs5/groups/B08201.json"
+  },
+  "B08201_001M": {
+    "label": "Margin of Error!!Total:",
+    "concept": "Household Size by Vehicles Available",
+    "source": "https://api.census.gov/data/2024/acs/acs5/groups/B08201.json"
+  },
+  "B08201_002E": {
+    "label": "Estimate!!Total:!!No vehicle available",
+    "concept": "Household Size by Vehicles Available",
+    "source": "https://api.census.gov/data/2024/acs/acs5/groups/B08201.json"
+  },
+  "B08201_002M": {
+    "label": "Margin of Error!!Total:!!No vehicle available",
+    "concept": "Household Size by Vehicles Available",
+    "source": "https://api.census.gov/data/2024/acs/acs5/groups/B08201.json"
+  },
+  "B19013_001E": {
+    "label": "Estimate!!Median household income in the past 12 months (in 2024 inflation-adjusted dollars)",
+    "concept": "Median Household Income in the Past 12 Months (in 2024 Inflation-Adjusted Dollars)",
+    "source": "https://api.census.gov/data/2024/acs/acs5/groups/B19013.json"
+  },
+  "B19013_001M": {
+    "label": "Margin of Error!!Median household income in the past 12 months (in 2024 inflation-adjusted dollars)",
+    "concept": "Median Household Income in the Past 12 Months (in 2024 Inflation-Adjusted Dollars)",
+    "source": "https://api.census.gov/data/2024/acs/acs5/groups/B19013.json"
+  }
+}
