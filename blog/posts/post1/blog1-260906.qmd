@@ -1,125 +1,74 @@
 ---
-title: "Why Lagrange Multipliers Work"
+title: "Why Your Best Affordable Choice Still Leaves You Wanting More"
+subtitle: "Lagrange multipliers and the value of the last dollar."
+author: "Yining Han"
 date: 2026-09-06
-categories:
-  - mathematics
-  - optimization
-  - economics
-description: "A geometric explanation of constrained optimization, gradient alignment, and the meaning of the multiplier."
-execute:
-  echo: false
-  warning: false
-  message: false
+date-modified: 2026-10-23
+categories: [mathematics, optimization, economics]
+description: "A lunch-budget puzzle explains why a constrained maximum can have positive marginal benefits, and what the Lagrange multiplier measures."
+image: results/figures/budget_and_marginal_returns.png
+toc: false
+lightbox: true
+resources:
+  - "results/**"
+  - "data/**"
+  - "code/**"
+  - README.md
+  - requirements.txt
 ---
 
-Optimization sounds simple: choose the input that makes an objective as large or as small as possible. The difficulty is that real choices are rarely unlimited. A consumer maximizes utility under a budget, a firm minimizes cost while meeting a production target, and a statistician estimates parameters that must satisfy model restrictions. Lagrange multipliers provide one method for handling such constraints. The formula is familiar, but its logic can feel mysterious: why should introducing an extra variable, usually called $\lambda$, solve the problem?
+You have spent your lunch budget well, yet another bite and another drink would both be welcome. If calculus says a maximum has a zero derivative, how can this be your best choice?
 
-## A Constraint Changes the Directions We Can Move
+This puzzle matters whenever we divide a limited budget: **when should we stop moving money between things we still enjoy?** Lagrange multipliers answer that question. Their unfamiliar extra symbol, $\lambda$, becomes much less mysterious once we understand the trade-off it records.
 
-Consider maximizing a differentiable function $f(x,y)$ subject to
+## A lunch budget, with deliberately simple preferences
 
-$$
-g(x,y)=0.
-$$
-
-Without the constraint, an interior optimum usually satisfies $\nabla f=0$. Under a constraint, however, we are not free to move in every direction. We may move only along the curve $g(x,y)=0$.
-
-The gradient $\nabla g$ is perpendicular to this constraint curve. Meanwhile, $\nabla f$ points in the direction in which $f$ increases most rapidly and is perpendicular to a level curve $f(x,y)=c$. If the level curve of $f$ crossed the constraint at an optimum, we could move along the constraint toward a higher level curve. Therefore, at a regular interior optimum, the two curves must be tangent. Their perpendicular vectors must consequently be parallel:
+Suppose you have \$12. Food costs \$2 per portion and drinks cost \$1 per portion. Let $x$ and $y$ be the quantities, allowing divisible portions to keep the arithmetic simple. Give each combination the illustrative satisfaction score
 
 $$
-\nabla f(x^*,y^*)=\lambda\nabla g(x^*,y^*).
+U(x,y)=xy.
 $$
 
-The multiplier $\lambda$ is needed because parallel vectors can have different lengths. It is the scaling factor between the two gradients.
+Multiplication captures a preference for a mix: extra food is more enjoyable when there is something to drink with it, and vice versa. These prices and preferences are invented assumptions, not survey data.
 
-## A Concrete Example
+With both quantities positive, more of either raises the score. The best choice therefore spends the full budget: $2x+y=12$.
 
-Suppose we want to maximize
+Start with 2 food portions and 8 drink portions. The score is 16. Move \$2 from drinks to food: now you have 3 food portions and 6 drink portions, scoring 18. Move another \$2 the same way and the score falls back to 16. The first switch improved the mix; the second removed drinks that had become more valuable alongside the additional food.
 
-$$
-f(x,y)=xy
-$$
+## Compare what the same dollar buys
 
-subject to
+A small increase in food raises the score at a rate of $y$ points per portion. Because a food portion costs \$2, the marginal gain per dollar is $y/2$. For drinks, it is $x/1$.
 
-$$
-x+y=10.
-$$
+At the starting allocation, these returns are 4 and 2 points per dollar. Moving a little spending toward food helps because its gain exceeds the loss from buying fewer drinks.
 
-The level curves $xy=c$ are hyperbolas, while the constraint is a straight line. The figure shows that $xy=25$ is the highest level curve that the constraint can reach. The higher curve $xy=36$ is unattainable.
-
-```{r}
-#| label: fig-tangency
-#| fig-cap: "The constraint is tangent to the highest attainable level curve at (5, 5)."
-#| fig-width: 7
-#| fig-height: 5
-
-x <- seq(0.5, 10, length.out = 500)
-plot(
-  NA,
-  xlim = c(0, 10), ylim = c(0, 10),
-  xlab = "x", ylab = "y",
-  main = "Constraint and Level Curves",
-  xaxs = "i", yaxs = "i"
-)
-polygon(c(0, 10, 0), c(0, 0, 10), col = "#E8F1FA", border = NA)
-abline(a = 10, b = -1, col = "#2166AC", lwd = 3)
-lines(x, 9 / x,  col = "#67A9CF", lwd = 2)
-lines(x, 25 / x, col = "#D6604D", lwd = 3)
-lines(x, 36 / x, col = "#777777", lwd = 2, lty = 2)
-points(5, 5, pch = 19, cex = 1.3)
-text(5, 5, "  optimum (5, 5)", pos = 4)
-legend(
-  "topright",
-  legend = c("x + y = 10", "xy = 9", "xy = 25", "xy = 36"),
-  col = c("#2166AC", "#67A9CF", "#D6604D", "#777777"),
-  lwd = c(3, 2, 3, 2), lty = c(1, 1, 1, 2),
-  bty = "n"
-)
-```
-
-Write the constraint as $10-x-y=0$ and form the Lagrangian
+As food spending rises, fewer drinks remain, reducing food's marginal return. More food also makes drinks more valuable. The two returns meet at 3 food portions and 6 drink portions:
 
 $$
-\mathcal{L}(x,y,\lambda)=xy+\lambda(10-x-y).
+\frac{6}{2}=\frac{3}{1}=3.
 $$
 
-The first-order conditions are
+![One budget, two views. The top panel identifies the best allocation; the bottom explains why a small transfer stops helping there. All values are calculated from the illustrative model, not observed consumption data.](results/figures/budget_and_marginal_returns.png){#fig-budget width=100% fig-alt="Top: satisfaction peaks at six dollars spent on food. Bottom: the marginal satisfaction per dollar from food falls and that from drinks rises; both equal three at the same allocation."}
+
+@fig-budget connects the highest score to equal marginal gains **per dollar**. Equal quantities or equal gains per portion would miss the different prices. Here the curve confirms a maximum; in other problems, first-order conditions alone may identify other kinds of stationary points.
+
+Both goods still offer positive benefits at this allocation. The usual zero-derivative rule must be applied to changes the budget allows. An increase in one quantity requires sacrificing the other. For a tiny budget-neutral transfer, the immediate gain and loss cancel. Larger transfers move us away from the best mix: shifting \$2 either way lowers the score from 18 to 16.
+
+## The extra symbol has an economic meaning
+
+The Lagrangian collects that spending rule and the budget in one expression:
 
 $$
-\frac{\partial\mathcal{L}}{\partial x}=y-\lambda=0,
-\qquad
-\frac{\partial\mathcal{L}}{\partial y}=x-\lambda=0,
+\mathcal L=xy+\lambda(12-2x-y).
 $$
 
-and
+Setting its derivatives to zero gives $y=2\lambda$, $x=\lambda$, and $2x+y=12$. Thus $y/2=x=\lambda$: the multiplier names the common marginal gain per dollar. Solving gives $x=3$, $y=6$, and $\lambda=3$. The derivatives of satisfaction itself remain positive; the equations subtract the opportunity cost of spending the budget.
 
-$$
-\frac{\partial\mathcal{L}}{\partial\lambda}=10-x-y=0.
-$$
+The same number also explains why more money still helps. With a general budget $I$, the best quantities are $x=I/4$ and $y=I/2$, giving $V(I)=I^2/8$. At $I=12$, $V'(I)=3$: a small budget increase raises the best attainable score by approximately 3 points per dollar.
 
-The first two equations imply $x=y$. Combining this with $x+y=10$ gives
+For example, a \$13 budget raises the maximum from 18 to 21.125, a gain of 3.125. That is close to 3, rather than exactly 3, because the multiplier is a local rate. Its units depend on our chosen satisfaction scale; it is not a dollar measure of happiness.
 
-$$
-x^*=y^*=5.
-$$
+For a smooth optimum with both goods purchased, the practical question is whether a small spending transfer could improve the outcome. Here equal marginal gains per dollar mark the best affordable mix, while a positive $\lambda$ measures the benefit of relaxing the budget. **You can have allocated your money well and still value having more.**
 
-Notice what differentiation with respect to $\lambda$ accomplishes: it simply restores the original constraint. We are not literally maximizing the Lagrangian over $\lambda$; instead, the Lagrangian packages the tangency condition and the constraint into one system of equations.
+---
 
-## The Multiplier as a Shadow Value
-
-In this example, if the right-hand side of the constraint is a general number $I$, the optimal solution is $x=y=I/2$. The optimized objective is therefore
-
-$$
-V(I)=\frac{I^2}{4}.
-$$
-
-Its derivative at $I=10$ is
-
-$$
-V'(10)=5=\lambda.
-$$
-
-Thus $\lambda$ has a second interpretation: it measures approximately how much the best attainable objective would increase if the constraint were relaxed by one unit. This is why economists call it a *shadow value* or *shadow price*.
-
-The method does require care. The gradients of the constraints must be well behaved, the first-order conditions identify only candidates, and boundary solutions may require additional analysis. Nevertheless, the central idea is simple and powerful: at a smooth constrained optimum, there is no feasible direction of improvement, so the objective gradient must lie in the normal direction generated by the constraint.
+**Sources and replication.** This is an analytical teaching example; no external dataset is used. The standard mathematical method is described in [OpenStax, *Calculus Volume 3*, §4.8](https://openstax.org/books/calculus-volume-3/pages/4-8-lagrange-multipliers). The [replication guide](README.md), [Python code](code/build.py), and [model assumptions](data/model.json) reproduce the numerical results and figure.

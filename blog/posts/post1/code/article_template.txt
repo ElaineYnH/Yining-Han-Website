@@ -1,0 +1,74 @@
+---
+title: "Why Your Best Affordable Choice Still Leaves You Wanting More"
+subtitle: "Lagrange multipliers and the value of the last dollar."
+author: "Yining Han"
+date: @@ORIGINAL_DATE@@
+date-modified: @@REVISION_DATE@@
+categories: [mathematics, optimization, economics]
+description: "A lunch-budget puzzle explains why a constrained maximum can have positive marginal benefits, and what the Lagrange multiplier measures."
+image: results/figures/budget_and_marginal_returns.png
+toc: false
+lightbox: true
+resources:
+  - "results/**"
+  - "data/**"
+  - "code/**"
+  - README.md
+  - requirements.txt
+---
+
+You have spent your lunch budget well, yet another bite and another drink would both be welcome. If calculus says a maximum has a zero derivative, how can this be your best choice?
+
+This puzzle matters whenever we divide a limited budget: **when should we stop moving money between things we still enjoy?** Lagrange multipliers answer that question. Their unfamiliar extra symbol, $\lambda$, becomes much less mysterious once we understand the trade-off it records.
+
+## A lunch budget, with deliberately simple preferences
+
+Suppose you have \$@@BUDGET@@. Food costs \$@@PX@@ per portion and drinks cost \$@@PY@@ per portion. Let $x$ and $y$ be the quantities, allowing divisible portions to keep the arithmetic simple. Give each combination the illustrative satisfaction score
+
+$$
+U(x,y)=xy.
+$$
+
+Multiplication captures a preference for a mix: extra food is more enjoyable when there is something to drink with it, and vice versa. These prices and preferences are invented assumptions, not survey data.
+
+With both quantities positive, more of either raises the score. The best choice therefore spends the full budget: $@@PX@@x+y=@@BUDGET@@$.
+
+Start with @@INITIAL_X@@ food portions and @@INITIAL_Y@@ drink portions. The score is @@INITIAL_U@@. Move \$@@TRANSFER@@ from drinks to food: now you have @@OPT_X@@ food portions and @@OPT_Y@@ drink portions, scoring @@OPT_U@@. Move another \$@@TRANSFER@@ the same way and the score falls back to @@AFTER_U@@. The first switch improved the mix; the second removed drinks that had become more valuable alongside the additional food.
+
+## Compare what the same dollar buys
+
+A small increase in food raises the score at a rate of $y$ points per portion. Because a food portion costs \$@@PX@@, the marginal gain per dollar is $y/@@PX@@$. For drinks, it is $x/@@PY@@$.
+
+At the starting allocation, these returns are @@INITIAL_FOOD_RETURN@@ and @@INITIAL_DRINK_RETURN@@ points per dollar. Moving a little spending toward food helps because its gain exceeds the loss from buying fewer drinks.
+
+As food spending rises, fewer drinks remain, reducing food's marginal return. More food also makes drinks more valuable. The two returns meet at @@OPT_X@@ food portions and @@OPT_Y@@ drink portions:
+
+$$
+\frac{@@OPT_Y@@}{@@PX@@}=\frac{@@OPT_X@@}{@@PY@@}=@@LAMBDA@@.
+$$
+
+![One budget, two views. The top panel identifies the best allocation; the bottom explains why a small transfer stops helping there. All values are calculated from the illustrative model, not observed consumption data.](results/figures/budget_and_marginal_returns.png){#fig-budget width=100% fig-alt="Top: satisfaction peaks at six dollars spent on food. Bottom: the marginal satisfaction per dollar from food falls and that from drinks rises; both equal three at the same allocation."}
+
+@fig-budget connects the highest score to equal marginal gains **per dollar**. Equal quantities or equal gains per portion would miss the different prices. Here the curve confirms a maximum; in other problems, first-order conditions alone may identify other kinds of stationary points.
+
+Both goods still offer positive benefits at this allocation. The usual zero-derivative rule must be applied to changes the budget allows. An increase in one quantity requires sacrificing the other. For a tiny budget-neutral transfer, the immediate gain and loss cancel. Larger transfers move us away from the best mix: shifting \$@@TRANSFER@@ either way lowers the score from @@OPT_U@@ to @@INITIAL_U@@.
+
+## The extra symbol has an economic meaning
+
+The Lagrangian collects that spending rule and the budget in one expression:
+
+$$
+\mathcal L=xy+\lambda(@@BUDGET@@-@@PX@@x-y).
+$$
+
+Setting its derivatives to zero gives $y=@@PX@@\lambda$, $x=\lambda$, and $@@PX@@x+y=@@BUDGET@@$. Thus $y/@@PX@@=x=\lambda$: the multiplier names the common marginal gain per dollar. Solving gives $x=@@OPT_X@@$, $y=@@OPT_Y@@$, and $\lambda=@@LAMBDA@@$. The derivatives of satisfaction itself remain positive; the equations subtract the opportunity cost of spending the budget.
+
+The same number also explains why more money still helps. With a general budget $I$, the best quantities are $x=I/@@X_DENOM@@$ and $y=I/@@Y_DENOM@@$, giving $V(I)=I^2/@@V_DENOM@@$. At $I=@@BUDGET@@$, $V'(I)=@@LAMBDA@@$: a small budget increase raises the best attainable score by approximately @@LAMBDA@@ points per dollar.
+
+For example, a \$@@NEW_BUDGET@@ budget raises the maximum from @@OPT_U@@ to @@NEW_U@@, a gain of @@GAIN@@. That is close to @@LAMBDA@@, rather than exactly @@LAMBDA@@, because the multiplier is a local rate. Its units depend on our chosen satisfaction scale; it is not a dollar measure of happiness.
+
+For a smooth optimum with both goods purchased, the practical question is whether a small spending transfer could improve the outcome. Here equal marginal gains per dollar mark the best affordable mix, while a positive $\lambda$ measures the benefit of relaxing the budget. **You can have allocated your money well and still value having more.**
+
+---
+
+**Sources and replication.** This is an analytical teaching example; no external dataset is used. The standard mathematical method is described in [OpenStax, *Calculus Volume 3*, §4.8](https://openstax.org/books/calculus-volume-3/pages/4-8-lagrange-multipliers). The [replication guide](README.md), [Python code](code/build.py), and [model assumptions](data/model.json) reproduce the numerical results and figure.

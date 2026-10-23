@@ -1,0 +1,14 @@
+{
+  "description": "Invented teaching example; these prices and preferences are assumptions, not observed data.",
+  "utility_function": "U(x, y) = x * y",
+  "x_definition": "Nonnegative, divisible food portions",
+  "y_definition": "Nonnegative, divisible drink portions",
+  "price_food_dollars": 2,
+  "price_drink_dollars": 1,
+  "budget_dollars": 12,
+  "comparison_budget_dollars": 13,
+  "initial_food_portions": 2,
+  "transfer_to_food_dollars": 2,
+  "original_publication_date": "2026-09-06",
+  "revision_date": "2026-10-23"
+}

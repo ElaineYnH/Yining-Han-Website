@@ -1,0 +1,48 @@
+{
+  "data_status": "Illustrative assumptions, not empirical observations.",
+  "initial": {
+    "budget_dollars": 12.0,
+    "food_spend_dollars": 4.0,
+    "drink_spend_dollars": 8.0,
+    "food_portions": 2.0,
+    "drink_portions": 8.0,
+    "satisfaction_score": 16.0,
+    "food_marginal_score_per_dollar": 4.0,
+    "drink_marginal_score_per_dollar": 2.0
+  },
+  "optimum": {
+    "budget_dollars": 12.0,
+    "food_spend_dollars": 6.0,
+    "drink_spend_dollars": 6.0,
+    "food_portions": 3.0,
+    "drink_portions": 6.0,
+    "satisfaction_score": 18.0,
+    "food_marginal_score_per_dollar": 3.0,
+    "drink_marginal_score_per_dollar": 3.0
+  },
+  "second_switch": {
+    "budget_dollars": 12.0,
+    "food_spend_dollars": 8.0,
+    "drink_spend_dollars": 4.0,
+    "food_portions": 4.0,
+    "drink_portions": 4.0,
+    "satisfaction_score": 16.0,
+    "food_marginal_score_per_dollar": 2.0,
+    "drink_marginal_score_per_dollar": 4.0
+  },
+  "larger_budget_optimum": {
+    "budget_dollars": 13.0,
+    "food_spend_dollars": 6.5,
+    "drink_spend_dollars": 6.5,
+    "food_portions": 3.25,
+    "drink_portions": 6.5,
+    "satisfaction_score": 21.125,
+    "food_marginal_score_per_dollar": 3.25,
+    "drink_marginal_score_per_dollar": 3.25
+  },
+  "lagrange_multiplier_score_per_dollar": 3.0,
+  "exact_score_gain": 3.125,
+  "linear_approximation_to_gain": 3.0,
+  "finite_change_minus_linear_approximation": 0.125,
+  "maximization_check": "U(s)=s(B-s)/(px*py), with negative second derivative on 0<=s<=B."
+}
