@@ -1,0 +1,43 @@
+{
+  "source_kind": "simulated teaching data; not survey observations",
+  "created_for": "AEDS 6400 Blog Post 6 tutorial",
+  "created_on": "2026-10-23",
+  "seed": 20261023,
+  "families": 1000,
+  "people": 2000,
+  "person_years": 15000,
+  "model_ige": 0.5,
+  "finite_sample_latent_log_slope": 0.5358294157673007,
+  "parent_log_status_sd": 0.65,
+  "child_log_status_residual_sd": 0.4,
+  "annual_log_shock_sd": 0.5,
+  "parent_birth_year": 1950,
+  "child_birth_year": 1980,
+  "parent_ages": [
+    40,
+    41,
+    42,
+    43,
+    44
+  ],
+  "child_ages": [
+    25,
+    26,
+    27,
+    28,
+    29,
+    40,
+    41,
+    42,
+    43,
+    44
+  ],
+  "child_status_loading_ages_25_29": 0.5,
+  "child_status_loading_ages_40_44": 1.0,
+  "price_units": "constant teaching dollars (simulated)",
+  "missing_and_zero_incomes": "none, by construction",
+  "family_id_definition": "stable origin-family identifier, not a current household ID",
+  "parent_id_definition": "explicit link to the one designated parent's person_id",
+  "annual_shocks": "independent across people and years",
+  "scope": "illustration of SQL matching and measurement choices, not a calibrated economic model"
+}

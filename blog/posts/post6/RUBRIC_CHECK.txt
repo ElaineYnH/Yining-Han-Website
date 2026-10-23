@@ -1,0 +1,79 @@
+BLOG POST 6 — EVIDENCE CHECK, 2026-10-23
+
+Sources reviewed
+Current Blog_posts_project_memory.md (version 2), the formal Blog Posts
+prompt, and blog_post_rubric.pdf. The instructor's October 21 announcement
+was read: it moves Blog 6 to Friday but gives no exact time. The live Canvas
+assignment's time and time zone have not been independently verified.
+
+Format
+A compact tutorial: task, actual short Python/SQL code, generated output,
+explanation, and one reveal-answer checkpoint. Approximately 600 words of
+prose, excluding code, tables, figure, and source footer; one substantive
+figure. Blog 6 does not impose Blog 3/4's three-figure requirement.
+
+Six common criteria
+1. Question and motivation: opening asks whether observing the same families
+   at different ages can change their apparent income association.
+2. Clear explanation: four numbered steps explain loading, the relationship
+   join, per-person aggregation, and the log-log elasticity. A short example
+   gives the percent-change interpretation.
+3. Interpretation and takeaway: contrasts young vs. midcareer estimates,
+   then single-year vs. five-year measures, on a common set of pairs. Explains
+   why averaging early-career income can leave life-cycle bias.
+4. Data and presentation: clearly labeled simulated data, fixed seed,
+   constant-dollar units, input schema, a known assumed benchmark, generated
+   tables and figure, and primary methodological/documentation links.
+5. Repository organization: code/, data/, results/, requirements, and README
+   with actual commands and installation/publication instructions.
+6. Reproducibility: the lesson runs SQL, saves matched incomes and estimates,
+   and inserts the executed code and computed numbers into a static article.
+   The generator and all inputs are included for an offline full rebuild.
+
+Four Blog 6 criteria
+7. SQL in Python and identifiers: sqlite3 + pandas; a self-join uses explicit
+   parent_id/person_id links and checks origin-family IDs. Repeated person-
+   year observations supply longitudinal incomes. The panel is simulated.
+8. SELECT/JOIN/GROUP BY/aggregation: explained alongside the actual working
+   queries; AVG, WHERE, HAVING, and bound parameters are also explained.
+   The checkpoint demonstrates the 4,000-row family-only join error.
+9. Income measures and IGE: six constructed income measures, four IGE
+   estimates using single-year and five-year income, intercept included,
+   levels averaged before logs, same 1,000 pairs in every comparison.
+10. Life-cycle bias and averaging: known generating beta 0.50, early-career
+    gaps deliberately compressed, young vs. midcareer comparison with the
+    parental single-year measure held fixed. Five-year averages reduce
+    transitory variation but leave the early-career compression. The text
+    does not equate every change in an empirical estimate with proof of bias.
+
+Checks actually completed
+- Generated the panel using seed 20261023 and executed the full SQL lesson.
+- Verified person and person-year keys, positive incomes, chronological ages,
+  exact relationship matches, common pairs, and complete income windows.
+- Cross-checked SQL means independently with pandas.
+- Verified that a common income-level shift leaves the elasticity unchanged.
+- Generated all four estimates, identifier preview, article, and figure.
+
+- Regenerated the supplied data from the fixed seed and rebuilt all outputs.
+- Executed the five Python blocks exactly as shown in the published article,
+  in order, and reproduced the saved estimates.
+- Rendered blog6.qmd and blog/index.qmd with Quarto 1.10.19.
+- Inspected the figure and rendered desktop/mobile pages.
+- Tested the actual code-copy button, expandable answer, figure enlargement,
+  loaded figure, simulated-data disclosure, and local article links.
+- Checked 390-pixel mobile width: code blocks scroll internally and the page
+  has no horizontal overflow.
+- Checked the listing: six articles, including exactly one Blog 6 entry.
+- Verified that tracked source files outside the new post6 were unchanged.
+
+The build and browser checks cover this article and the listing, not execution
+of all older posts or a remote deployment. Installation and publication are
+left to the user's existing commit/push workflow.
+
+Evidence boundaries
+No real-world income estimates, survey microdata, population weighting,
+statistical significance, or causal education/income effects are claimed.
+The model is a teaching illustration with disclosed assumptions; the stated
+0.50 is a generating parameter, not a national empirical benchmark.
+This checklist documents evidence; it is not a prediction or guarantee of
+a grade.

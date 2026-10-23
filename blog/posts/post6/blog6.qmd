@@ -1,0 +1,161 @@
+---
+title: "Matching Parents and Children with SQL"
+subtitle: "A short Python tutorial on income timing and economic mobility."
+author: "Yining Han"
+date: 2026-10-23
+categories: [Python, SQL, Economic mobility]
+description: "Match parents and children, average their incomes, and see why measuring earnings too early can change the apparent link between generations."
+image: results/figures/income_timing.png
+format: html
+toc: false
+code-copy: true
+lightbox: true
+resources:
+  - "code/**"
+  - "data/**"
+  - "results/**"
+  - requirements.txt
+  - README.md
+  - RUBRIC_CHECK.txt
+---
+
+**Can the apparent link between parents' and children's incomes change simply because we measure earnings at different ages?** This mini-tutorial uses SQL inside Python to match family members and compare four income measures. The lesson is that correct matching is only the beginning: the income window also matters.
+
+We use **simulated teaching data**, with 1,000 families and one designated parent–child pair per family. `people.csv` contains stable person IDs, origin-family IDs, birth years, and an explicit parent ID. `earnings.csv` contains 15,000 person-year records. All incomes are positive, complete, and in constant teaching dollars. The model's long-run elasticity is **0.50**, giving us a known benchmark; these are **not U.S. survey estimates**.
+
+## 1. Load the two tables
+
+Download this post's [folder](https://github.com/ElaineYnH/Yining-Han-Website/tree/main/blog/posts/post6), open Python from `post6`, and install NumPy and pandas if needed: `python -m pip install numpy pandas`. Python's [sqlite3 module](https://docs.python.org/3/library/sqlite3.html) supplies the database connection. The assertions check the keys and positive incomes before taking logarithms.
+
+```python
+from pathlib import Path
+import sqlite3
+import numpy as np
+import pandas as pd
+
+ROOT = Path.cwd()  # Run the lesson cells from the downloaded post6 folder.
+
+con = sqlite3.connect(":memory:")
+people = pd.read_csv(ROOT / "data/people.csv", dtype={"parent_id": "Int64"})
+earnings = pd.read_csv(ROOT / "data/earnings.csv")
+people.to_sql("people", con, index=False)
+earnings.to_sql("earnings", con, index=False)
+assert people.person_id.is_unique
+assert not earnings.duplicated(["person_id", "year"]).any()
+assert earnings.income.gt(0).all()
+```
+
+`to_sql` copies each data frame into an in-memory SQLite table. No separate database server is needed.
+
+## 2. Match people using the relationship
+
+```python
+sample = pd.read_sql_query("""
+SELECT c.family_id, c.person_id AS child_id,
+       p.person_id AS parent_id
+FROM people AS c
+JOIN people AS p
+  ON c.parent_id = p.person_id
+ AND c.family_id = p.family_id
+ORDER BY child_id
+""", con)
+assert len(sample) == sample.child_id.nunique() == 1000
+```
+
+`SELECT` chooses the output columns. The aliases `c` and `p` let us refer to the same table twice. `JOIN ... ON` links a child's recorded `parent_id` to that parent's `person_id`; the family ID checks the origin-family link. A shared family or current household ID alone cannot identify a parent. Here each child appears once:
+
+::: {.table-responsive}
+| family_id | child_id | parent_id |
+| --- | --- | --- |
+| 1 | 20001 | 10001 |
+| 2 | 20002 | 10002 |
+| 3 | 20003 | 10003 |
+:::
+
+**Quick check:** How many rows would joining on `family_id` alone produce?
+
+<details>
+<summary>Reveal the answer</summary>
+
+4,000. Each family's two people would each match both people, including themselves. Only one of those four combinations is the intended child-to-parent link. Keep the explicit relationship condition.
+
+</details>
+
+## 3. Summarize income before combining generations
+
+```python
+def mean_income(lo, hi):
+    out = pd.read_sql_query("""
+    SELECT person_id, AVG(income) AS income
+    FROM earnings
+    WHERE age BETWEEN ? AND ?
+    GROUP BY person_id
+    HAVING COUNT(*) = ?
+    """, con, params=(lo, hi, hi - lo + 1))
+    return out.set_index("person_id")["income"]
+```
+
+`WHERE` selects ages; `GROUP BY` collects each person's records; `AVG` aggregates their income. `HAVING` requires the full number of years, so a single observation cannot masquerade as a five-year mean. The `?` placeholders receive the age bounds and required count through `params`.
+
+Now attach each measure by its person's ID. Parents are observed at age 40 or ages 40–44; children at age 25 or 40, or their corresponding five-year windows. All four comparisons retain the same 1,000 pairs.
+
+```python
+windows = {
+    "p1": ("parent_id", 40, 40),
+    "p5": ("parent_id", 40, 44),
+    "c25": ("child_id", 25, 25),
+    "c25_5": ("child_id", 25, 29),
+    "c40": ("child_id", 40, 40),
+    "c40_5": ("child_id", 40, 44),
+}
+for name, (person, lo, hi) in windows.items():
+    sample[name] = sample[person].map(mean_income(lo, hi))
+assert sample[list(windows)].notna().all().all()
+```
+
+The function averages **income levels first**. We take logarithms afterward. This differs from averaging log incomes. The unique person-year check makes the observation counts meaningful.
+
+## 4. Estimate and interpret the elasticity
+
+The **intergenerational elasticity (IGE)** is the slope from regressing log child income on log parent income, with an intercept. For example, an IGE near 0.5 associates a 10% parental-income difference with roughly a 5% child-income difference. It is an association, not the fraction of income inherited or a causal effect.
+
+```python
+def ige(parent, child):
+    # polyfit returns the slope and intercept of the log-log regression.
+    return np.polyfit(np.log(parent), np.log(child), 1)[0]
+
+cases = [
+    ("Child age 25: one year", "p1", "c25"),
+    ("Child ages 25-29: five-year mean", "p5", "c25_5"),
+    ("Child age 40: one year", "p1", "c40"),
+    ("Child ages 40-44: five-year mean", "p5", "c40_5"),
+]
+estimates = pd.DataFrame([
+    {"measure": label, "ige": ige(sample[p], sample[c]), "n": len(sample)}
+    for label, p, c in cases
+])
+print(estimates.round(3).to_string(index=False))
+```
+
+**Output from the supplied data:**
+
+::: {.table-responsive}
+| Child age(s) | Income window | IGE |
+| --- | --- | --- |
+| 25 | Single year | 0.135 |
+| 25–29 | Five-year mean | 0.242 |
+| 40 | Single year | 0.334 |
+| 40–44 | Five-year mean | 0.474 |
+:::
+
+![IGE estimates from the same 1,000 simulated pairs. Single-year measures use parent age 40; five-year measures average parent ages 40–44. The dashed line is the model's assumed long-run elasticity, not an observed national benchmark.](results/figures/income_timing.png){#fig-income-timing width=100% fig-alt="Four simulated IGE estimates: 0.135 using child age 25, 0.242 averaging ages 25 to 29, 0.334 using age 40, and 0.474 averaging ages 40 to 44. The model parameter is 0.50."}
+
+Holding the single-year parental measure fixed, moving child income from age 25 to 40 raises the estimate from **0.135 to 0.334**. In this model, future higher earners have faster career growth, so early income differences understate long-run differences. Reducing everybody's income by the same percentage would shift the log-income intercept, not the elasticity. This illustrates the age-dependent proxy problem studied by [Haider and Solon (2006)](https://doi.org/10.1257/aer.96.4.1308).
+
+Five-year averages at midcareer produce **0.474**, nearer the 0.50 benchmark. Averaging reduces transitory variation, including noise in parental income that can attenuate the slope. Yet averaging young incomes still gives only **0.242**: smoothing several early years does not remove their compressed income gaps. These conclusions reflect the stated simulation, not a claim about the magnitude of real-world bias.
+
+**Takeaway:** Match on verified relationships, aggregate within person, and compare income windows on the same pairs. Longer averages can better approximate long-run status, but observation age remains essential. With real data, also justify the treatment of zero incomes, missing years, inflation, and sample selection.
+
+---
+
+**Run it yourself:** The complete [Python lesson](code/tutorial.py), [data generator](code/generate_data.py), [simulation assumptions](data/simulation.json), [matched incomes](results/matched_incomes.csv), and [estimates](results/ige_estimates.csv) are included. The [README](README.md) gives the one-command rebuild and publication steps. SQL reference: [SQLite SELECT documentation](https://sqlite.org/lang_select.html).

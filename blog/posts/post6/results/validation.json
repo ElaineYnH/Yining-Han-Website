@@ -1,0 +1,14 @@
+{
+  "people": 2000,
+  "person_years": 15000,
+  "matched_pairs": 1000,
+  "unique_children": 1000,
+  "family_only_join_rows": 4000,
+  "same_pairs_in_all_four_estimates": true,
+  "duplicate_person_years": 0,
+  "missing_income_measures": 0,
+  "nonpositive_annual_incomes": 0,
+  "sql_parent_child_links_match_input": true,
+  "sql_mean_matches_independent_pandas_check": true,
+  "common_income_level_shift_preserves_slope": true
+}
