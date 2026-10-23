@@ -1,0 +1,22 @@
+{
+  "capture_date_utc": "2026-10-23",
+  "raw_postings": 19,
+  "employer_title_entries": 17,
+  "distinct_employers": 15,
+  "repeated_employer_title_postings_removed": 2,
+  "remote_title_or_location": 11,
+  "telecommuting_field_yes": 7,
+  "both_yes": 5,
+  "text_yes_flag_no": 6,
+  "flag_yes_no_text": 2,
+  "neither_positive": 4,
+  "union_discovery_queue": 13,
+  "explicit_remote_conflicts": 6,
+  "one_signal_only": 8,
+  "remote_text_disagree_percent": 54.54545455,
+  "worldwide_in_title_or_location": 6,
+  "oldest_posting": "2026-07-24",
+  "newest_posting": "2026-10-20",
+  "requests_in_saved_refresh": 19,
+  "scope_note": "Advertised field statements, not verified remote availability or an estimate of the whole labor market."
+}

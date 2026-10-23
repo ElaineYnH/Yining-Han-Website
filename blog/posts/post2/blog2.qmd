@@ -1,270 +1,66 @@
 ---
-title: "Pay Per Ride or Buy a Pass? A SEPTA Break-Even Guide"
+title: "When a Remote Python Job Says No Telecommuting"
 author: "Yining Han"
 date: 2026-09-21
-categories:
-  - web scraping
-  - transportation
-  - personal finance
-description: "I scrape SEPTA's fare page to find the exact number of Bus and Metro trips that makes each pass worth buying."
-format:
-  html:
-    toc: true
-    code-fold: true
-    code-tools: true
-execute:
-  echo: true
-  warning: false
-  message: false
+date-modified: 2026-10-23
+categories: [web scraping, job search, Python]
+description: "A comparison of remote-work signals in Python.org job advertisements shows why a checkbox and a location label can produce different shortlists."
+image: results/figures/remote_signals.png
+toc: false
+lightbox: true
+resources:
+  - "results/**"
+  - "data/**"
+  - "code/**"
+  - README.md
+  - RUBRIC_CHECK.txt
 ---
 
-```{r}
-#| label: setup-and-scrape
+Suppose you find a promising Python job, see “remote,” and start tailoring a résumé. Then another field says “No telecommuting.” Should you discard the listing or keep reading? For an applicant with limited search time, this is a screening problem: **can one remote-work field provide a dependable shortlist?** I compared two signals on the [Python.org Job Board](https://www.python.org/jobs/) rather than assuming either was correct.
 
-library(rvest)
-library(httr2)
-library(dplyr)
-library(stringr)
-library(ggplot2)
-library(scales)
-library(knitr)
+## One board, two signals
 
-fare_url <- "https://wwww.septa.org/fares/"
-snapshot_path <- "data/septa_fares_snapshot.csv"
+My 2026-10-23 snapshot (UTC) contains 19 posting cards. Keeping the newest posting for each company–title combination leaves 17 entries. For example, three Evaboot advertisements for the same title become one entry. The unit is an advertised company–title combination, not a verified vacancy.
 
-dir.create(dirname(snapshot_path), recursive = TRUE, showWarnings = FALSE)
+Using R and `rvest`, I extracted company, title, location, and posting date, then followed each retained advertisement to collect its **Restrictions** field. A title/location signal means those short fields mention remote work, telecommuting, or working from home. The second signal is the explicit “Telecommuting is OK” flag. A missing remote mention does not establish that a job is on-site.
 
-scrape_septa_fares <- function(url) {
-  # This project makes only one page request. The short pause is an
-  # additional courtesy if the function is sourced in a larger workflow.
-  Sys.sleep(0.5)
+These are public pages. The scraper checks [robots.txt](https://www.python.org/robots.txt), pauses 1.5 seconds before requests, and uses no login or access-control workaround. Saved factual HTML fragments allow offline replication; the [README](README.md) documents the selectors and cleaning rules.
 
-  page <- request(url) |>
-    req_user_agent("Academic-Web-Scraping-Project/1.0") |>
-    req_timeout(30) |>
-    req_perform() |>
-    resp_body_raw() |>
-    read_html()
+## The filter changes the shortlist
 
-  heading_text <- page |>
-    html_elements("h2") |>
-    html_text2()
+11 entries signal remote work in their title or location, while 7 have the positive telecommuting flag. Only 5 satisfy both. Most strikingly, 6 of the 11 remote-text entries—about 55%—have a field saying “No telecommuting.”
 
-  pay_per_ride_text <- heading_text[
-    str_detect(heading_text, "^\\$[0-9]+(?:\\.[0-9]+)?/Trip$")
-  ]
+![The same advertisements produce different shortlists. “Remote text” refers only to the title and location; “flag” refers to the detail page's telecommuting field. Neither signal is proof of actual eligibility. Counts use 17 company–title combinations after merging repeated postings.](results/figures/remote_signals.png){#fig-remote width=100% fig-alt="Four bars count the overlap between a remote mention in title/location and a positive telecommuting flag. The largest group has remote text but a negative flag."}
 
-  list_text <- page |>
-    html_elements("li") |>
-    html_text2()
+Filtering these records by the flag alone returns 7 entries. Taking either signal as a reason to investigate gives 13, adding 6 leads that the flag-only approach excludes. These are **additional advertisements to verify**, not 6 confirmed remote opportunities. Another 2 entries have a positive flag without remote wording in their title or location; that adds information rather than creating an explicit contradiction.
 
-  pass_text <- list_text |>
-    str_subset(
-      "One Day Convenience Pass|Three Day Convenience Pass|Weekly TransPass\\+|Monthly TransPass\\+"
-    ) |>
-    unique()
+The disagreement matters because screening happens before an applicant invests effort in a tailored application. These fields can help organize that effort, but neither field can resolve the other by itself. This comparison identifies inconsistent statements; it does not determine which statement reflects the employer's current policy.
 
-  if (length(pay_per_ride_text) == 0 || length(pass_text) != 4) {
-    stop("The SEPTA page structure has changed; update the selectors.")
-  }
+## Remote work still has location conditions
 
-  get_price <- function(x) {
-    as.numeric(str_remove(str_extract(x, "\\$[0-9]+(?:\\.[0-9]+)?"), "\\$"))
-  }
+The examples below show why “remote” and “eligible from my country” are different questions.
 
-  pass_data <- tibble(
-    product = case_when(
-      str_detect(pass_text, "One Day") ~ "One Day Convenience Pass",
-      str_detect(pass_text, "Three Day") ~ "Three Day Convenience Pass",
-      str_detect(pass_text, "Weekly") ~ "Weekly TransPass+",
-      str_detect(pass_text, "Monthly") ~ "Monthly TransPass+"
-    ),
-    price = get_price(pass_text),
-    validity = case_when(
-      str_detect(pass_text, "One Day") ~ "One day",
-      str_detect(pass_text, "Three Day") ~ "Three-day period",
-      str_detect(pass_text, "Weekly") ~ "One week",
-      str_detect(pass_text, "Monthly") ~ "One month"
-    )
-  )
+::: {.table-responsive}
+| Example | Title/location signal | Detail field | First check |
+| --- | --- | --- | --- |
+| [tem](https://www.python.org/jobs/8139/) | Remote (UK / EU) | Telecommuting is OK | Check UK/EU eligibility. |
+| [Adzuna](https://www.python.org/jobs/8131/) | Remote, within 2 hours of London time | No telecommuting | Check hours; clarify the flag. |
+| [ActivePrime, Inc.](https://www.python.org/jobs/8134/) | Title says fully remote worldwide | No telecommuting | Clarify the flag; confirm countries. |
+| [Reef Technologies](https://www.python.org/jobs/8122/) | Warsaw (fully remote), Poland | No telecommuting | Confirm eligible countries. |
+:::
 
-  bind_rows(
-    tibble(
-      product = "Pay per ride",
-      price = get_price(pay_per_ride_text[[1]]),
-      validity = "One paid Bus or Metro trip"
-    ),
-    pass_data
-  ) |>
-    mutate(
-      scraped_on = as.character(Sys.Date()),
-      source_url = url
-    )
-}
+Even agreement between the two signals does not establish worldwide eligibility. The tem entry has a positive telecommuting flag but states UK/EU in its location. Adzuna's time-zone condition gives a distant applicant a concrete reason to check fit, while its negative flag creates a separate inconsistency to clarify. A company city, a worldwide title, and a working-hours condition should each be read for what they actually say.
 
-# Keep a dated snapshot so the post remains reproducible if the live page is
-# temporarily unavailable. A successful scrape refreshes that snapshot.
-fares_live <- tryCatch(
-  scrape_septa_fares(fare_url),
-  error = function(e) NULL
-)
+## A practical screening rule
 
-if (is.null(fares_live)) {
-  fares <- read.csv(snapshot_path, stringsAsFactors = FALSE)
-  data_status <- "the repository snapshot"
-} else {
-  fares <- fares_live
-  write.csv(fares, snapshot_path, row.names = FALSE)
-  data_status <- "a live scrape"
-}
+First, build a discovery list using **either** the title/location signal or the positive flag. Put conflicting entries in a “verify first” queue instead of automatically discarding them. The saved [review queue](results/review_queue.csv) makes this distinction explicit for this snapshot.
 
-data_date <- max(as.Date(fares$scraped_on))
+Second, before tailoring an application, read the current employer advertisement for permitted countries, required working hours, and employment or contractor eligibility. Someone outside the stated UK/EU region should check tem's location condition; someone more than two hours from London should check Adzuna's time-zone requirement before investing further effort.
 
-ride_fare <- fares |>
-  filter(product == "Pay per ride") |>
-  pull(price)
+Third, when the fields conflict or country eligibility remains unstated, clarify the current rule with the employer. The useful questions are whether an applicant resident in your country can be engaged and which working hours are required. A worldwide label alone does not answer work-authorization questions.
 
-break_even <- fares |>
-  filter(product != "Pay per ride") |>
-  mutate(
-    # Work in integer cents so an exact tie is not distorted by
-    # floating-point rounding.
-    trips_to_save = round(price * 100) %/% round(ride_fare * 100) + 1,
-    pay_per_ride_cost = trips_to_save * ride_fare,
-    savings_at_threshold = pay_per_ride_cost - price
-  )
+This is a small, self-selected board, not a representative survey of Python hiring. A listed advertisement may also be old or no longer recruiting. The practical takeaway is to **use multiple signals to find leads, then use explicit eligibility conditions to decide where to spend application time**.
 
-get_threshold <- function(pass_name) {
-  break_even |>
-    filter(product == pass_name) |>
-    pull(trips_to_save)
-}
+---
 
-one_day_threshold <- get_threshold("One Day Convenience Pass")
-three_day_threshold <- get_threshold("Three Day Convenience Pass")
-weekly_threshold <- get_threshold("Weekly TransPass+")
-monthly_threshold <- get_threshold("Monthly TransPass+")
-monthly_tie <- break_even |>
-  filter(product == "Monthly TransPass+") |>
-  pull(price) / ride_fare
-```
-
-SEPTA offers a simple choice that is surprisingly easy to get wrong: pay for each Bus or Metro trip, or buy a pass in advance. A pass feels economical because it offers many trips for a fixed price, but it can cost more when a rider does not use it enough. I therefore ask a practical question: **how many paid trips make each SEPTA pass cheaper than paying per ride?** The answer can guide commuters, students, and visitors before they load a SEPTA Key card.
-
-## Data and responsible scraping
-
-I collected the prices from SEPTA's public [Fare Information page](https://www.septa.org/fares/). The data used here are dated `r data_date`. SEPTA serves the readable static HTML at its own `wwww.septa.org` subdomain, while the reader-facing link uses the usual `www` address. The page requires no account, paywall, CAPTCHA, or other access control. When I accessed it, its `robots.txt` permitted the extension-free fare page. My script identifies itself with a descriptive user agent, pauses briefly, and makes only one request. It then uses `rvest` to extract the pay-per-ride heading and the four Bus and Metro pass entries. The analysis currently uses `r data_status`; the dated CSV snapshot in the repository is the fallback if SEPTA is temporarily unavailable.
-
-The scraper selects the relevant `<h2>` and `<li>` elements, cleans dollar signs and descriptive text, and converts each price to a number. I also included checks that stop the live scrape if SEPTA changes the page structure, rather than silently returning incorrect data.
-
-## Turning prices into a decision rule
-
-For a pass costing $P$ and a pay-per-ride fare of $f$, the first trip count at which the pass is *strictly* cheaper is
-
-$$
-\left\lfloor \frac{P}{f} \right\rfloor + 1.
-$$
-
-This counts **paid trips**, not every vehicle boarded. SEPTA currently allows up to two free transfers within two hours when riders use the same Key card or contactless card, so a bus-to-Metro journey with a free transfer still counts as one paid trip.
-
-```{r}
-#| label: tbl-break-even
-#| tbl-cap: "The first number of paid trips at which each pass costs less than pay per ride."
-
-break_even |>
-  transmute(
-    Pass = product,
-    Price = dollar(price),
-    `First trip count where pass is cheaper` = trips_to_save,
-    `Savings at that count` = dollar(savings_at_threshold)
-  ) |>
-  kable(align = c("l", "r", "r", "r"))
-```
-
-The short-period passes have intuitive thresholds. The one-day pass pays off on paid trip `r one_day_threshold`, while the three-day pass pays off on trip `r three_day_threshold`. The weekly result is more surprising: a standard five-day round-trip commute is 10 paid trips and costs `r dollar(10 * ride_fare)`, which is still `r dollar(break_even$price[break_even$product == "Weekly TransPass+"] - 10 * ride_fare)` less than the weekly pass. The pass first wins at `r weekly_threshold` trips, so one additional paid trip during the week changes the decision.
-
-The monthly pass has an exact tie at `r monthly_tie` trips. A rider making 20 round-trip commute days pays `r dollar(40 * ride_fare)` either way; the pass begins saving money on trip `r monthly_threshold`.
-
-```{r}
-#| label: fig-monthly-break-even
-#| fig-cap: "The monthly pass and pay-per-ride cost lines cross at the break-even point."
-#| fig-width: 7
-#| fig-height: 4.5
-
-monthly_price <- break_even |>
-  filter(product == "Monthly TransPass+") |>
-  pull(price)
-
-monthly_costs <- tibble(
-  paid_trips = 0:60,
-  pay_per_ride = paid_trips * ride_fare,
-  monthly_pass = monthly_price
-)
-
-monthly_plot <- ggplot(monthly_costs, aes(x = paid_trips)) +
-  geom_line(
-    aes(y = pay_per_ride, color = "Pay per ride"),
-    linewidth = 1.1
-  ) +
-  geom_line(
-    aes(y = monthly_pass, color = "Monthly pass"),
-    linewidth = 1.1
-  ) +
-  geom_vline(
-    xintercept = monthly_price / ride_fare,
-    color = "#666666",
-    linetype = "dotted"
-  ) +
-  annotate(
-    "point",
-    x = monthly_price / ride_fare,
-    y = monthly_price,
-    size = 2.8
-  ) +
-  annotate(
-    "text",
-    x = monthly_price / ride_fare + 1.5,
-    y = monthly_price - 9,
-    label = paste0("Equal at ", monthly_tie, " trips"),
-    hjust = 0
-  ) +
-  scale_y_continuous(labels = label_dollar()) +
-  scale_color_manual(
-    values = c("Pay per ride" = "#1f77b4", "Monthly pass" = "#d95f02")
-  ) +
-  labs(
-    x = "Paid Bus or Metro trips in one month",
-    y = "Total fare cost",
-    color = NULL
-  ) +
-  theme_minimal(base_size = 12) +
-  theme(legend.position = "top")
-
-dir.create("figures", showWarnings = FALSE)
-ggsave(
-  "figures/monthly_break_even.png",
-  monthly_plot,
-  width = 7,
-  height = 4.5,
-  dpi = 160
-)
-
-monthly_plot
-```
-
-## Recommendation
-
-The actionable rule is simple: **pay per ride when travel is irregular; buy a pass only when the expected paid-trip count reaches its threshold.** For Bus and Metro travel alone, a five-day round-trip commuter should pay per ride for a 10-trip week, but choose the weekly pass at `r weekly_threshold` or more trips. A monthly commuter should buy the pass at `r monthly_threshold` or more trips, while a visitor making at least `r one_day_threshold` paid trips in one day should choose the one-day pass.
-
-This comparison is deliberately conservative. Passes can include Regional Rail privileges, and some riders value cost certainty even at a small premium. Discounts and special programs may also change the calculation. Still, the central takeaway remains: a fixed-price pass is not automatically a bargain. Count paid trips first, remember that free transfers do not add fares, and rerun the scraper whenever SEPTA updates its prices.
-
-## Reproducibility
-
-All reported values, the table, and the figure are generated from the scraped data. Package and platform details are recorded below.
-
-```{r}
-#| label: session-info
-#| code-fold: true
-
-sessionInfo()
-```
+**Data and replication:** [Saved listing fields](data/listing_snapshot.csv), [classified entries](results/roles_classified.csv), [R scraper](code/scrape.R), [offline analysis](code/analyze.R), and [replication guide](README.md). The [GitHub source folder](https://github.com/ElaineYnH/Yining-Han-Website/tree/main/blog/posts/post2) contains all files. Original source links for each entry are retained in the data and example table.

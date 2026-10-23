@@ -1,0 +1,6 @@
+| Example | Title/location signal | Detail field | First check |
+| --- | --- | --- | --- |
+| [tem](https://www.python.org/jobs/8139/) | Remote (UK / EU) | Telecommuting is OK | Check UK/EU eligibility. |
+| [Adzuna](https://www.python.org/jobs/8131/) | Remote, within 2 hours of London time | No telecommuting | Check hours; clarify the flag. |
+| [ActivePrime, Inc.](https://www.python.org/jobs/8134/) | Title says fully remote worldwide | No telecommuting | Clarify the flag; confirm countries. |
+| [Reef Technologies](https://www.python.org/jobs/8122/) | Warsaw (fully remote), Poland | No telecommuting | Confirm eligible countries. |

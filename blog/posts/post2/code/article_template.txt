@@ -1,0 +1,61 @@
+---
+title: "When a Remote Python Job Says No Telecommuting"
+author: "Yining Han"
+date: 2026-09-21
+date-modified: 2026-10-23
+categories: [web scraping, job search, Python]
+description: "A comparison of remote-work signals in Python.org job advertisements shows why a checkbox and a location label can produce different shortlists."
+image: results/figures/remote_signals.png
+toc: false
+lightbox: true
+resources:
+  - "results/**"
+  - "data/**"
+  - "code/**"
+  - README.md
+  - RUBRIC_CHECK.txt
+---
+
+Suppose you find a promising Python job, see “remote,” and start tailoring a résumé. Then another field says “No telecommuting.” Should you discard the listing or keep reading? For an applicant with limited search time, this is a screening problem: **can one remote-work field provide a dependable shortlist?** I compared two signals on the [Python.org Job Board](https://www.python.org/jobs/) rather than assuming either was correct.
+
+## One board, two signals
+
+My @@SNAPSHOT_DATE@@ snapshot (UTC) contains @@RAW@@ posting cards. Keeping the newest posting for each company–title combination leaves @@N@@ entries. For example, three Evaboot advertisements for the same title become one entry. The unit is an advertised company–title combination, not a verified vacancy.
+
+Using R and `rvest`, I extracted company, title, location, and posting date, then followed each retained advertisement to collect its **Restrictions** field. A title/location signal means those short fields mention remote work, telecommuting, or working from home. The second signal is the explicit “Telecommuting is OK” flag. A missing remote mention does not establish that a job is on-site.
+
+These are public pages. The scraper checks [robots.txt](https://www.python.org/robots.txt), pauses 1.5 seconds before requests, and uses no login or access-control workaround. Saved factual HTML fragments allow offline replication; the [README](README.md) documents the selectors and cleaning rules.
+
+## The filter changes the shortlist
+
+@@REMOTE_TEXT@@ entries signal remote work in their title or location, while @@FLAG_YES@@ have the positive telecommuting flag. Only @@BOTH@@ satisfy both. Most strikingly, @@TEXT_ONLY@@ of the @@REMOTE_TEXT@@ remote-text entries—about @@PERCENT_TEXT_ONLY@@%—have a field saying “No telecommuting.”
+
+![The same advertisements produce different shortlists. “Remote text” refers only to the title and location; “flag” refers to the detail page's telecommuting field. Neither signal is proof of actual eligibility. Counts use @@N@@ company–title combinations after merging repeated postings.](results/figures/remote_signals.png){#fig-remote width=100% fig-alt="Four bars count the overlap between a remote mention in title/location and a positive telecommuting flag. The largest group has remote text but a negative flag."}
+
+Filtering these records by the flag alone returns @@FLAG_YES@@ entries. Taking either signal as a reason to investigate gives @@UNION@@, adding @@TEXT_ONLY@@ leads that the flag-only approach excludes. These are **additional advertisements to verify**, not @@TEXT_ONLY@@ confirmed remote opportunities. Another @@FLAG_ONLY@@ entries have a positive flag without remote wording in their title or location; that adds information rather than creating an explicit contradiction.
+
+The disagreement matters because screening happens before an applicant invests effort in a tailored application. These fields can help organize that effort, but neither field can resolve the other by itself. This comparison identifies inconsistent statements; it does not determine which statement reflects the employer's current policy.
+
+## Remote work still has location conditions
+
+The examples below show why “remote” and “eligible from my country” are different questions.
+
+::: {.table-responsive}
+@@CASE_TABLE@@
+:::
+
+Even agreement between the two signals does not establish worldwide eligibility. The tem entry has a positive telecommuting flag but states UK/EU in its location. Adzuna's time-zone condition gives a distant applicant a concrete reason to check fit, while its negative flag creates a separate inconsistency to clarify. A company city, a worldwide title, and a working-hours condition should each be read for what they actually say.
+
+## A practical screening rule
+
+First, build a discovery list using **either** the title/location signal or the positive flag. Put conflicting entries in a “verify first” queue instead of automatically discarding them. The saved [review queue](results/review_queue.csv) makes this distinction explicit for this snapshot.
+
+Second, before tailoring an application, read the current employer advertisement for permitted countries, required working hours, and employment or contractor eligibility. Someone outside the stated UK/EU region should check tem's location condition; someone more than two hours from London should check Adzuna's time-zone requirement before investing further effort.
+
+Third, when the fields conflict or country eligibility remains unstated, clarify the current rule with the employer. The useful questions are whether an applicant resident in your country can be engaged and which working hours are required. A worldwide label alone does not answer work-authorization questions.
+
+This is a small, self-selected board, not a representative survey of Python hiring. A listed advertisement may also be old or no longer recruiting. The practical takeaway is to **use multiple signals to find leads, then use explicit eligibility conditions to decide where to spend application time**.
+
+---
+
+**Data and replication:** [Saved listing fields](data/listing_snapshot.csv), [classified entries](results/roles_classified.csv), [R scraper](code/scrape.R), [offline analysis](code/analyze.R), and [replication guide](README.md). The [GitHub source folder](https://github.com/ElaineYnH/Yining-Han-Website/tree/main/blog/posts/post2) contains all files. Original source links for each entry are retained in the data and example table.

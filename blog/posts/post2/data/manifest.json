@@ -1,0 +1,128 @@
+{
+  "source": "Python.org public Job Board",
+  "scope": "All posting cards visible on the board; newest posting per employer-title pair retained.",
+  "index_urls": "https://www.python.org/jobs/",
+  "index_files": "index_01.html",
+  "raw_postings": 19,
+  "retained_roles": 17,
+  "detail_ids": [
+    8181,
+    8180,
+    8176,
+    8175,
+    8174,
+    8139,
+    8136,
+    8135,
+    8134,
+    8133,
+    8131,
+    8129,
+    8128,
+    8126,
+    8122,
+    8121,
+    8120
+  ],
+  "user_agent": "YiningHan-AEDS6400-Blog2/1.0 (educational; low-frequency)",
+  "pause_seconds": 1.5,
+  "requests": [
+    {
+      "url": "https://www.python.org/robots.txt",
+      "status": 200,
+      "fetched_at_utc": "2026-10-23 00:15:39 UTC"
+    },
+    {
+      "url": "https://www.python.org/jobs/",
+      "status": 200,
+      "fetched_at_utc": "2026-10-23 00:15:41 UTC"
+    },
+    {
+      "url": "https://www.python.org/jobs/8181/",
+      "status": 200,
+      "fetched_at_utc": "2026-10-23 00:15:43 UTC"
+    },
+    {
+      "url": "https://www.python.org/jobs/8180/",
+      "status": 200,
+      "fetched_at_utc": "2026-10-23 00:15:44 UTC"
+    },
+    {
+      "url": "https://www.python.org/jobs/8176/",
+      "status": 200,
+      "fetched_at_utc": "2026-10-23 00:15:46 UTC"
+    },
+    {
+      "url": "https://www.python.org/jobs/8175/",
+      "status": 200,
+      "fetched_at_utc": "2026-10-23 00:15:48 UTC"
+    },
+    {
+      "url": "https://www.python.org/jobs/8174/",
+      "status": 200,
+      "fetched_at_utc": "2026-10-23 00:15:49 UTC"
+    },
+    {
+      "url": "https://www.python.org/jobs/8139/",
+      "status": 200,
+      "fetched_at_utc": "2026-10-23 00:15:51 UTC"
+    },
+    {
+      "url": "https://www.python.org/jobs/8136/",
+      "status": 200,
+      "fetched_at_utc": "2026-10-23 00:15:52 UTC"
+    },
+    {
+      "url": "https://www.python.org/jobs/8135/",
+      "status": 200,
+      "fetched_at_utc": "2026-10-23 00:15:54 UTC"
+    },
+    {
+      "url": "https://www.python.org/jobs/8134/",
+      "status": 200,
+      "fetched_at_utc": "2026-10-23 00:15:55 UTC"
+    },
+    {
+      "url": "https://www.python.org/jobs/8133/",
+      "status": 200,
+      "fetched_at_utc": "2026-10-23 00:15:57 UTC"
+    },
+    {
+      "url": "https://www.python.org/jobs/8131/",
+      "status": 200,
+      "fetched_at_utc": "2026-10-23 00:15:59 UTC"
+    },
+    {
+      "url": "https://www.python.org/jobs/8129/",
+      "status": 200,
+      "fetched_at_utc": "2026-10-23 00:16:00 UTC"
+    },
+    {
+      "url": "https://www.python.org/jobs/8128/",
+      "status": 200,
+      "fetched_at_utc": "2026-10-23 00:16:02 UTC"
+    },
+    {
+      "url": "https://www.python.org/jobs/8126/",
+      "status": 200,
+      "fetched_at_utc": "2026-10-23 00:16:03 UTC"
+    },
+    {
+      "url": "https://www.python.org/jobs/8122/",
+      "status": 200,
+      "fetched_at_utc": "2026-10-23 00:16:05 UTC"
+    },
+    {
+      "url": "https://www.python.org/jobs/8121/",
+      "status": 200,
+      "fetched_at_utc": "2026-10-23 00:16:07 UTC"
+    },
+    {
+      "url": "https://www.python.org/jobs/8120/",
+      "status": 200,
+      "fetched_at_utc": "2026-10-23 00:16:08 UTC"
+    }
+  ],
+  "capture_date_utc": "2026-10-23",
+  "storage_note": "Original factual HTML fragments only; full pages and descriptions are not redistributed."
+}

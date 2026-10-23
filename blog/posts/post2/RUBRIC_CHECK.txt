@@ -1,0 +1,53 @@
+# Blog 2: grading evidence and revision checks
+
+The original screenshots show 8/10, with 0/1 for question/motivation, 0.5/1 for
+interpretation/takeaway, and 0.5/1 for substantive actionable insight. The explicit
+motivation comment says comparing only a few prices did not require scraping.
+No detailed comments were shown for the other two half-point deductions.
+
+The revision changes the question and dataset: it compares title/location and
+telecommuting fields across all 19 visible Python.org posting cards, with 17
+company-title combinations after merging repeated postings. The collection,
+cross-field comparison, and duplicate handling have a purpose in the decision.
+It does not try to improve the old fare calculation merely by adding prose.
+
+| Point | Formal criterion | Substantive evidence |
+| --- | --- | --- |
+| 1 | Question and motivation | Opening asks whether one remote-work field provides a dependable shortlist; applicants must allocate application effort under uncertainty. |
+| 2 | Clear explanation | “One board, two signals” defines the counting unit and the two independently extracted fields. The next section distinguishes discovery candidates from confirmed eligibility. |
+| 3 | Interpretation and takeaway | The 7-versus-13 discovery comparison is interpreted as a change in advertisements to verify, not a gain in confirmed remote jobs. The final paragraph turns it into an application-effort rule. |
+| 4 | Data and presentation | Dated public sources, per-entry links, clearly labeled count figure, example table, and a small-board limitation. Data files retain the source fields. |
+| 5 | Repository organization | `code/`, `data/`, and `results/`; README contains actual offline, refresh, and render commands. |
+| 6 | Reproducibility and coding | R scripts parse saved source fragments, validate field coverage, merge duplicates, calculate all results, save outputs, and fill the article template programmatically. |
+| 7 | Uses rvest | `scrape.R` and `parse.R` use rvest to extract listing cards and each retained detail page's Restrictions field. The live R scrape was actually run. |
+| 8 | Ethical/access restrictions | `scrape.R` checks robots, identifies itself, pauses 1.5 seconds per request, and stops on access errors. No login, employer application page, or access-control workaround. The saved run has 19 requests. |
+| 9 | Cleans and analyzes data | Whitespace and UTF-8 handling, exact ID checks, transparent company-title deduplication, literal field validation, overlap counts, discovery union, and verification queue. |
+| 10 | Substantive actionable recommendation | Use either signal to discover leads; clarify the six explicit conflicts; check country and working-hours conditions before tailoring applications. The generated queue and linked examples implement these different next steps. |
+
+Checks completed for this revision:
+
+- Actual R 4.3.3 network collection with rvest, followed by offline R analysis.
+- All 17 retained records and their field classifications inspected; four
+  illustrative records linked in the article.
+- Cross-tab accounting: 5 + 6 + 2 + 4 = 17; text signal = 11; flag signal = 7;
+  union = 13. Six explicit contradictions are separated from the two cases in
+  which a positive flag adds information to otherwise silent short fields.
+- The capture date is derived from recorded UTC request timestamps.
+- Main figure inspected for labels, counts, and legibility.
+
+- Quarto 1.10.19 successfully rendered the revised article and the blog index
+  using the current repository configuration. The original `blog2.html` URL
+  is retained. The entire legacy website was not rebuilt; a preview warning
+  for the unrendered older Post 3 is outside this check's scope.
+- The blog list contains one revised Blog 2 entry and the other four existing
+  articles. Supporting checks and the generated case table use `.txt` files
+  so they do not become additional blog entries.
+- All local links to the figure, data, R files, and replication guide resolve.
+- Desktop and 390-pixel mobile layouts inspected; the table scrolls inside its
+  own container without horizontal page overflow. The figure enlarges on click.
+- Article prose is approximately 650 words, excluding the table, figure caption,
+  and data/replication note. One substantive figure and one linked case table
+  support the same screening question.
+
+This checklist records evidence, not an assurance of a particular grade.
+Publication is left to the user's existing commit/push workflow.
