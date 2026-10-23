@@ -1,0 +1,65 @@
+BLOG POST 3 REVISION — 2026-10-23
+
+Scope
+The confirmed lost point concerns whether the visualizations jointly answer
+one question and tell a coherent economic story. The original CPS summary,
+microdata preparation script, four education groups, and three plot
+specifications are retained. PNGs have an explicit white background.
+
+Revision
+Question: Had the education gap in jobholding closed after unemployment
+fell from its pandemic level?
+Figure 1 establishes the unequal unemployment shock and subsequent decline.
+Figure 2 shows that recovery toward each group's own baseline coexists
+with a 24.8-point gap in employment in 2025 (26.6 points in 2019).
+Figure 3 places approximately 22.9 points of the 2025 gap in nonparticipation
+and 2.0 points in unemployment, using the same population denominator.
+About 92% corresponds to nonparticipation. This is an accounting result;
+the analysis does not identify causes or reasons for nonparticipation.
+The BLS definition explains why people outside the labor force should not
+all be treated as unsuccessful jobseekers. Participation rates are stated
+explicitly, and the conclusion connects all three figures.
+
+Rubric evidence (criteria, not predicted scores)
+1. Question and motivation: opening asks whether falling unemployment also
+   meant a closing education gap in jobholding; conclusion explains why
+   this matters for assessing recovery.
+2. Clear explanation: sample, three April snapshots, weights, and different
+   denominators are described in the text and figure captions.
+3. Interpretation and takeaway: each figure advances the same question;
+   the last two paragraphs explain the implications and limits.
+4. Data and presentation: linked IPUMS CPS source/version and WTFINL
+   documentation; original axes, units, and colors; expanded captions and
+   alternative text; BLS definitions and pandemic classification caveat.
+5. Organization: code/, data/, results/, figures/, and this README's actual
+   installation, offline build, and optional microdata acquisition steps.
+6. Reproducibility: build_from_summary.R regenerates figures, article numbers,
+   and saved decomposition/metrics, with arithmetic consistency checks.
+7. IPUMS CPS microdata: original preparation script and its weighted output
+   are retained. Private individual records are not redistributed.
+8. Appropriate weights: prepare_cps.R uses the basic monthly person weight
+   WTFINL for every numerator and denominator. The revision verifies all
+   three rate formulas against the saved weighted totals.
+9. At least three substantive figures: unemployment over time, employment
+   over time, and nonemployment status composition in 2025.
+10. Coherent story: shock eased -> jobholding rebounded but gap persisted ->
+    most of the current gap corresponds to nonparticipation. The decomposition
+    connects the figures without implying a causal education effect.
+
+Verification actually completed
+- Ran the R build using R 4.3.3, ggplot2 3.4.4, and scales 1.3.0.
+- Inspected all three generated figures.
+- Verified the original summary and prepare_cps.R byte-for-byte against
+  the source repository and compared the three plot specifications.
+- Verified rates, 12 unique year/education cells, and the decomposition.
+- Rendered the article and blog listing with Quarto 1.10.19.
+- Checked three loaded figures, descriptive alternative text, local article
+  links, and image enlargement in a browser.
+- Checked desktop and 390-pixel mobile display: no horizontal page overflow.
+- Checked that the listing still has five posts and one Blog 3 entry.
+
+Limits
+The private IPUMS extract was not available and its preparation was not
+rerun. This revision is reproduced from the original saved summary.
+Other older posts were not executed; this is not a full-site build claim.
+This checklist documents evidence and checks, not a guarantee of a score.
