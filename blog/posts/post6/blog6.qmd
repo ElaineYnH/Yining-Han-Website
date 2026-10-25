@@ -2,7 +2,7 @@
 title: "Matching Parents and Children with SQL"
 subtitle: "A short Python tutorial using real PSID income data."
 author: "Yining Han"
-date: 2026-10-26
+date: 2026-10-23
 categories: [Python, SQL, Economic mobility]
 description: "Match mothers, fathers and children in PSID and learn why the years used to measure income matter."
 image: results/figures/income_timing.png
