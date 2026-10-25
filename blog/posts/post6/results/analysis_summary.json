@@ -1,0 +1,51 @@
+{
+  "children": 606,
+  "parent_child_pairs": 1212,
+  "mothers": 424,
+  "fathers": 424,
+  "original_child_families": 362,
+  "kinship_clusters": 362,
+  "largest_cluster_children": 6,
+  "child_birth_min": 1969,
+  "child_birth_max": 1988,
+  "income_years": [
+    1993,
+    2022
+  ],
+  "input_individuals": 62218,
+  "income_records": 220872,
+  "zero_income_records": 55883,
+  "observation_counts": {
+    "p_n": [
+      3,
+      7
+    ],
+    "early_n": [
+      3,
+      7
+    ],
+    "later_n": [
+      3,
+      5
+    ]
+  },
+  "age_change_average": {
+    "mother": {
+      "later_minus_early": -0.031084134036401492,
+      "ci": [
+        -0.0806022118654193,
+        0.017967742278259455
+      ]
+    },
+    "father": {
+      "later_minus_early": 0.04915272520344266,
+      "ci": [
+        -0.020544557095696362,
+        0.11562861370182195
+      ]
+    }
+  },
+  "bootstrap_draws": 2000,
+  "bootstrap_seed": 20261026,
+  "source_extract_sha256": "56fabedbc986cf907ed1b547b310ea7dc2cba0ca74f551a4245626788fa081c9"
+}

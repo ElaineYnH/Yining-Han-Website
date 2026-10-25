@@ -1,12 +1,14 @@
 ---
 title: "Matching Parents and Children with SQL"
-subtitle: "A short Python tutorial on income timing and economic mobility."
+subtitle: "A short Python tutorial using real PSID income data."
 author: "Yining Han"
-date: 2026-10-23
+date: 2026-10-26
 categories: [Python, SQL, Economic mobility]
-description: "Match parents and children, average their incomes, and see why measuring earnings too early can change the apparent link between generations."
+description: "Match mothers, fathers and children in PSID and learn why the years used to measure income matter."
 image: results/figures/income_timing.png
-format: html
+format:
+  html:
+    html-math-method: mathml
 toc: false
 code-copy: true
 lightbox: true
@@ -17,81 +19,90 @@ resources:
   - requirements.txt
   - README.md
   - RUBRIC_CHECK.txt
+  - REVISION_NOTES.txt
 ---
 
-**Can the apparent link between parents' and children's incomes change simply because we measure earnings at different ages?** This mini-tutorial uses SQL inside Python to match family members and compare four income measures. The lesson is that correct matching is only the beginning: the income window also matters.
+**Would we infer the same link between parents' and children's earnings if we measured the children in their twenties or thirties?** This tutorial matches both mothers and fathers to their children using SQL inside Python, then compares single-year income with averages.
 
-We use **simulated teaching data**, with @@N@@ families and one designated parent–child pair per family. `people.csv` contains stable person IDs, origin-family IDs, birth years, and an explicit parent ID. `earnings.csv` contains @@ROWS@@ person-year records. All incomes are positive, complete, and in constant teaching dollars. The model's long-run elasticity is **@@TARGET@@**, giving us a known benchmark; these are **not U.S. survey estimates**.
+We use real [Panel Study of Income Dynamics (PSID)](https://psidonline.isr.umich.edu/) public-use data: {{INPUT_INDIVIDUALS}} individuals and income years 1993–2022. Income is individual labor income, excluding farm and unincorporated business income. Preparation retains released imputations and eligible zero incomes, handles documented special codes, and converts amounts to 2020 dollars with [BLS CPI-U](https://www.bls.gov/cpi/factsheets/purchasing-power-constant-dollars.htm). Ages refer to the income calendar year.
 
-## 1. Load the two tables
+## 1. Open the local database
 
-Download this post's [folder](https://github.com/ElaineYnH/Yining-Han-Website/tree/main/blog/posts/post6), open Python from `post6`, and install NumPy and pandas if needed: `python -m pip install numpy pandas`. Python's [sqlite3 module](https://docs.python.org/3/library/sqlite3.html) supplies the database connection. The assertions check the keys and positive incomes before taking logarithms.
-
-```python
-@@SETUP@@
-```
-
-`to_sql` copies each data frame into an in-memory SQLite table. No separate database server is needed.
-
-## 2. Match people using the relationship
+First follow the [README's replication command](README.md) using your own registered PSID download. It creates `people` and `earnings` tables outside the website repository; individual records are not distributed here. Then run these blocks in order. Python's [sqlite3](https://docs.python.org/3/library/sqlite3.html) needs no separate server.
 
 ```python
-@@MATCH@@
+from pathlib import Path
+import sqlite3
+import numpy as np
+import pandas as pd
+
+WORK = Path.home() / 'blog6_psid_work'
+con = sqlite3.connect(WORK / 'psid.sqlite')
 ```
 
-`SELECT` chooses the output columns. The aliases `c` and `p` let us refer to the same table twice. `JOIN ... ON` links a child's recorded `parent_id` to that parent's `person_id`; the family ID checks the origin-family link. A shared family or current household ID alone cannot identify a parent. Here each child appears once:
+Income preparation checks each year's sequence number and relationship: a reference person's income belongs to that individual, not automatically to the father. Other household members' earnings are unavailable in this extract.
 
-::: {.table-responsive}
-@@MATCH_PREVIEW@@
-:::
+## 2. Match the recorded parents
 
-**Quick check:** How many rows would joining on `family_id` alone produce?
+```python
+{{MATCH}}
+```
+
+`SELECT` chooses columns. `UNION ALL` stacks mother and father links. `JOIN ... ON` matches **both** the parent's original-family identifier and person number, following [PSID's identifier documentation](https://psidonline.isr.umich.edu/Guide/FAQ.aspx). Family ID alone cannot identify a parent. Multiplying it by 1,000 and adding the person number produces a convenient individual ID. A parent can correctly match several children.
+
+## 3. Aggregate before combining generations
+
+```python
+{{SUMMARIZE}}
+```
+
+`WHERE` selects ages; `GROUP BY` gathers observations for each individual. `AVG` calculates their arithmetic mean, including zeros; `COUNT` and `HAVING` require three observed income years. The remaining lines select one year closest to a target age, breaking ties toward the earlier year.
+
+**Try it:** A parent has four income records and their child has three. How many rows would joining annual records by their relationship alone create?
 
 <details>
-<summary>Reveal the answer</summary>
+<summary>Check your answer</summary>
 
-@@BAD_ROWS@@. Each family's two people would each match both people, including themselves. Only one of those four combinations is the intended child-to-parent link. Keep the explicit relationship condition.
+Twelve. Every parent year matches every child year. Aggregate each person's records first to avoid treating these combinations as independent pairs.
 
 </details>
 
-## 3. Summarize income before combining generations
+## 4. Hold the children constant
+
+Use parent ages 35–44 and child ages 20–29 and 30–39, with single-year targets 40, 25 and 35. The survey is biennial after 1997: three observed income years need not be consecutive.
 
 ```python
-@@AGGREGATE@@
+{{SAMPLE}}
 ```
 
-`WHERE` selects ages; `GROUP BY` collects each person's records; `AVG` aggregates their income. `HAVING` requires the full number of years, so a single observation cannot masquerade as a five-year mean. The `?` placeholders receive the age bounds and required count through `params`.
+Requiring positive log inputs and both parents leaves **{{CHILDREN}} children**, linked to {{MOTHERS}} mothers and {{FATHERS}} fathers. Every specification uses these same children. Both-parent coverage and positive anchor-year earnings select a particular sample; these unweighted estimates are not national mobility statistics.
 
-Now attach each measure by its person's ID. Parents are observed at age 40 or ages 40–44; children at age 25 or 40, or their corresponding five-year windows. All four comparisons retain the same @@N@@ pairs.
+For each parent separately, estimate the intergenerational elasticity (IGE):
+
+$$
+\log Y_c=\alpha+\beta\log Y_p+\varepsilon.
+$$
 
 ```python
-@@ATTACH@@
+{{ESTIMATE}}
 ```
 
-The function averages **income levels first**. We take logarithms afterward. This differs from averaging log incomes. The unique person-year check makes the observation counts meaningful.
+Take logs **after** averaging real dollars. A 1% difference in parental income is associated with approximately a $\beta$% difference in child income. These are separate maternal and paternal associations, not a combined-family-income model or causal effects.
 
-## 4. Estimate and interpret the elasticity
+![Eight IGE estimates for the same children, comparing income in their twenties and thirties, with mothers and fathers shown separately.](results/figures/income_timing.png){#fig-income-timing fig-alt="Two panels show maternal and paternal IGE estimates using single-year and averaged income at two child age windows, with 95 percent intervals."}
 
-The **intergenerational elasticity (IGE)** is the slope from regressing log child income on log parent income, with an intercept. For example, an IGE near 0.5 associates a 10% parental-income difference with roughly a 5% child-income difference. It is an association, not the fraction of income inherited or a causal effect.
+*Source: PSID public-use data; author's calculations. Parent ages: 35–44. Intervals: 95%, from 2,000 bootstrap draws of {{KINSHIP_CLUSTERS}} kinship groups, keeping shared parents and original family lineages together.*
 
-```python
-@@ESTIMATE@@
-```
+For fathers, single-year slopes are **{{FATHER_EARLY_SINGLE}}** and **{{FATHER_LATER_SINGLE}}**; averaged slopes are **{{FATHER_EARLY_AVERAGE}}** and **{{FATHER_LATER_AVERAGE}}**. A single year's earnings would suggest substantially weaker persistence here. Maternal averaged slopes instead fall from {{MOTHER_EARLY_AVERAGE}} to {{MOTHER_LATER_AVERAGE}}. Older measurement does not mechanically increase an estimate. The paternal averaged age difference is {{FATHER_AGE_CHANGE}}, with a paired 95% interval {{FATHER_AGE_CI}}: this sample cannot precisely distinguish that difference from zero.
 
-**Output from the supplied data:**
+## Why does measurement age matter?
 
-::: {.table-responsive}
-@@RESULT_TABLE@@
-:::
+[Haider and Solon (2006)](https://www.aeaweb.org/articles?id=10.1257/aer.96.4.1308) document age-dependent relationships between current and lifetime earnings. Suppose
 
-![IGE estimates from the same @@N@@ simulated pairs. Single-year measures use parent age 40; five-year measures average parent ages 40–44. The dashed line is the model's assumed long-run elasticity, not an observed national benchmark.](results/figures/income_timing.png){#fig-income-timing width=100% fig-alt="Four simulated IGE estimates: @@YOUNG_ONE@@ using child age 25, @@YOUNG_MEAN@@ averaging ages 25 to 29, @@MID_ONE@@ using age 40, and @@MID_MEAN@@ averaging ages 40 to 44. The model parameter is @@TARGET@@."}
+$$
+\log Y_{c,t}=a_t+\lambda_t\log Y_{c,\mathrm{life}}+u_t.
+$$
 
-Holding the single-year parental measure fixed, moving child income from age 25 to 40 raises the estimate from **@@YOUNG_ONE@@ to @@MID_ONE@@**. In this model, future higher earners have faster career growth, so early income differences understate long-run differences. Reducing everybody's income by the same percentage would shift the log-income intercept, not the elasticity. This illustrates the age-dependent proxy problem studied by [Haider and Solon (2006)](https://doi.org/10.1257/aer.96.4.1308).
+With uncorrelated errors and correctly measured parental lifetime income, the age-$t$ slope is $\lambda_t\beta$. When $\lambda_t\neq1$, it differs from the lifetime IGE: **life-cycle bias**. For illustration, $\lambda_t=0.6$ and $\beta=0.4$ imply an observed slope of 0.24; these are hypothetical parameters. Our timing comparison illustrates sensitivity, without identifying the true lifetime slope or separating age from calendar-period effects.
 
-Five-year averages at midcareer produce **@@MID_MEAN@@**, nearer the @@TARGET@@ benchmark. Averaging reduces transitory variation, including noise in parental income that can attenuate the slope. Yet averaging young incomes still gives only **@@YOUNG_MEAN@@**: smoothing several early years does not remove their compressed income gaps. These conclusions reflect the stated simulation, not a claim about the magnitude of real-world bias.
-
-**Takeaway:** Match on verified relationships, aggregate within person, and compare income windows on the same pairs. Longer averages can better approximate long-run status, but observation age remains essential. With real data, also justify the treatment of zero incomes, missing years, inflation, and sample selection.
-
----
-
-**Run it yourself:** The complete [Python lesson](code/tutorial.py), [data generator](code/generate_data.py), [simulation assumptions](data/simulation.json), [matched incomes](results/matched_incomes.csv), and [estimates](results/ige_estimates.csv) are included. The [README](README.md) gives the one-command rebuild and publication steps. SQL reference: [SQLite SELECT documentation](https://sqlite.org/lang_select.html).
+Averaging parental income can reduce temporary noise in the explanatory variable; averaging child income smooths unusual years and can improve precision. A twenties-only average can still misrepresent lifetime earnings. **Aggregate first, use several observations at economically comparable ages, and report the ages and sample behind every IGE.**

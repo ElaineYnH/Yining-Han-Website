@@ -1,138 +1,245 @@
-"""The complete lesson. Run from any directory with Python 3.11 or later.
-
-The START/END markers let build_post.py insert the actual working code into
-the article. Every printed estimate is also saved to a CSV.
-"""
-# START setup
+"""SQL/Python lesson and aggregate-only publication outputs from PSID."""
 from pathlib import Path
-import sqlite3
-import numpy as np
-import pandas as pd
-
-ROOT = Path.cwd()  # Run the lesson cells from the downloaded post6 folder.
-# END setup
-
-# The command-line script also works when launched from the repository root.
-if "__file__" in globals():
-    ROOT = Path(__file__).resolve().parents[1]
-
-# START load
-con = sqlite3.connect(":memory:")
-people = pd.read_csv(ROOT / "data/people.csv", dtype={"parent_id": "Int64"})
-earnings = pd.read_csv(ROOT / "data/earnings.csv")
-people.to_sql("people", con, index=False)
-earnings.to_sql("earnings", con, index=False)
-assert people.person_id.is_unique
-assert not earnings.duplicated(["person_id", "year"]).any()
-assert earnings.income.gt(0).all()
-# END load
-
-age_check = earnings.merge(people[["person_id", "birth_year"]],
-                           on="person_id", validate="many_to_one")
-assert (age_check["year"] - age_check.birth_year == age_check.age).all()
-
-# START match
-sample = pd.read_sql_query("""
-SELECT c.family_id, c.person_id AS child_id,
-       p.person_id AS parent_id
-FROM people AS c
-JOIN people AS p
-  ON c.parent_id = p.person_id
- AND c.family_id = p.family_id
-ORDER BY child_id
-""", con)
-assert len(sample) == sample.child_id.nunique() == 1000
-# END match
-
-expected = (people.loc[people.parent_id.notna(),
-                       ["family_id", "person_id", "parent_id"]]
-            .rename(columns={"person_id": "child_id"})
-            .sort_values("child_id").reset_index(drop=True))
-pd.testing.assert_frame_equal(sample, expected, check_dtype=False)
-family_only_count = con.execute("""
-SELECT COUNT(*) FROM people AS c
-JOIN people AS p ON c.family_id = p.family_id
-""").fetchone()[0]
-assert family_only_count == 4 * len(sample)
-
-# START aggregate
-def mean_income(lo, hi):
-    out = pd.read_sql_query("""
-    SELECT person_id, AVG(income) AS income
-    FROM earnings
-    WHERE age BETWEEN ? AND ?
-    GROUP BY person_id
-    HAVING COUNT(*) = ?
-    """, con, params=(lo, hi, hi - lo + 1))
-    return out.set_index("person_id")["income"]
-# END aggregate
-
-# START attach
-windows = {
-    "p1": ("parent_id", 40, 40),
-    "p5": ("parent_id", 40, 44),
-    "c25": ("child_id", 25, 25),
-    "c25_5": ("child_id", 25, 29),
-    "c40": ("child_id", 40, 40),
-    "c40_5": ("child_id", 40, 44),
-}
-for name, (person, lo, hi) in windows.items():
-    sample[name] = sample[person].map(mean_income(lo, hi))
-assert sample[list(windows)].notna().all().all()
-# END attach
-
-# Independently cross-check a SQL aggregation with pandas.
-midlife = earnings.loc[earnings.age.between(40, 44)]
-manual = midlife.groupby("person_id").income.mean().sort_index()
-np.testing.assert_allclose(mean_income(40, 44).sort_index(), manual,
-                           rtol=1e-12, atol=1e-8)
-
-# START estimate
-def ige(parent, child):
-    # polyfit returns the slope and intercept of the log-log regression.
-    return np.polyfit(np.log(parent), np.log(child), 1)[0]
-
-cases = [
-    ("Child age 25: one year", "p1", "c25"),
-    ("Child ages 25-29: five-year mean", "p5", "c25_5"),
-    ("Child age 40: one year", "p1", "c40"),
-    ("Child ages 40-44: five-year mean", "p5", "c40_5"),
-]
-estimates = pd.DataFrame([
-    {"measure": label, "ige": ige(sample[p], sample[c]), "n": len(sample)}
-    for label, p, c in cases
-])
-print(estimates.round(3).to_string(index=False))
-# END estimate
-
-# A common income-level shift changes the intercept, not the slope. The
-# simulated life-cycle effect comes from different income growth by type.
-assert abs(ige(sample.p1, sample.c40 * np.exp(-0.6)) -
-           ige(sample.p1, sample.c40)) < 1e-12
-
 import json
 import platform
-import sys
+import sqlite3
 
-out = ROOT / "results"
-out.mkdir(parents=True, exist_ok=True)
-sample.to_csv(out / "matched_incomes.csv", index=False, float_format="%.12g")
-estimates.to_csv(out / "ige_estimates.csv", index=False, float_format="%.12g")
-sample[["family_id", "child_id", "parent_id"]].head(3).to_csv(
-    out / "match_preview.csv", index=False)
-(out / "validation.json").write_text(json.dumps({
-    "people": len(people), "person_years": len(earnings),
-    "matched_pairs": len(sample), "unique_children": sample.child_id.nunique(),
-    "family_only_join_rows": family_only_count,
-    "same_pairs_in_all_four_estimates": True,
-    "duplicate_person_years": 0, "missing_income_measures": 0,
-    "nonpositive_annual_incomes": 0,
-    "sql_parent_child_links_match_input": True,
-    "sql_mean_matches_independent_pandas_check": True,
-    "common_income_level_shift_preserves_slope": True,
-}, indent=2) + "\n", encoding="utf-8")
-(out / "sessionInfo.txt").write_text(
-    f"Python: {sys.version}\nPlatform: {platform.system()}\n"
-    f"NumPy: {np.__version__}\npandas: {pd.__version__}\n"
-    f"SQLite: {sqlite3.sqlite_version}\n", encoding="utf-8")
-con.close()
+import numpy as np
+import pandas as pd
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def load_tables(work_dir):
+    database = Path(work_dir) / 'psid.sqlite'
+    if not database.exists():
+        raise FileNotFoundError('Run code/run_analysis.py with your downloaded ZIP first.')
+    return sqlite3.connect(database)
+
+
+def match_families(con):
+    # BEGIN match
+    links = pd.read_sql_query('''
+    WITH parent_keys AS (
+      SELECT id68 AS child_family, pn AS child_pn,
+             mother_id68 AS parent_family, mother_pn AS parent_pn,
+             'mother' AS parent_role FROM people
+      UNION ALL
+      SELECT id68, pn, father_id68, father_pn, 'father' FROM people
+    )
+    SELECT k.child_family * 1000 + k.child_pn AS child_id,
+           p.id68 * 1000 + p.pn AS parent_id,
+           k.child_family AS family_id, k.parent_role
+    FROM parent_keys AS k
+    JOIN people AS p ON k.parent_family = p.id68 AND k.parent_pn = p.pn
+    WHERE k.parent_family > 0 AND k.parent_pn BETWEEN 1 AND 399
+    ORDER BY child_id, parent_role
+    ''', con)
+    assert not links.duplicated(['child_id', 'parent_role']).any()
+    # END match
+    return links
+
+
+# BEGIN summarize
+def summarize(con, lo, hi, target):
+    averages = pd.read_sql_query('''
+    SELECT id68 * 1000 + pn AS person_id,
+           AVG(income) AS average, COUNT(*) AS n_years
+    FROM earnings WHERE age BETWEEN ? AND ?
+    GROUP BY id68, pn HAVING COUNT(*) >= 3
+    ''', con, params=(lo, hi))
+    rows = pd.read_sql_query('''
+    SELECT id68 * 1000 + pn AS person_id, year, age, income
+    FROM earnings WHERE age BETWEEN ? AND ?
+    ''', con, params=(lo, hi))
+    rows['distance'] = abs(rows.age - target)
+    anchors = (rows.sort_values(['distance', 'year']).drop_duplicates('person_id')
+               .rename(columns={'income': 'single'}))
+    return averages.merge(anchors[['person_id', 'single']], on='person_id')
+# END summarize
+
+
+def build_sample(con, links):
+    # BEGIN sample
+    sample = links.copy()
+    specs = [(35, 44, 40, 'p', 'parent_id'),
+             (20, 29, 25, 'early', 'child_id'),
+             (30, 39, 35, 'later', 'child_id')]
+    for lo, hi, target, label, key in specs:
+        measures = summarize(con, lo, hi, target).rename(columns={
+            'person_id': key, 'average': f'{label}_average',
+            'single': f'{label}_single', 'n_years': f'{label}_n'})
+        sample = sample.merge(measures, on=key, validate='many_to_one')
+    columns = [f'{g}_{m}' for g in ['p', 'early', 'later']
+               for m in ['single', 'average']]
+    sample = sample.loc[sample[columns].gt(0).all(axis=1)].copy()
+    both = sample.groupby('child_id').parent_role.nunique().eq(2)
+    sample = sample.loc[sample.child_id.isin(both[both].index)].copy()
+    # END sample
+    return sample
+
+
+def estimate(sample):
+    # BEGIN estimate
+    estimates = []
+    for role in ['mother', 'father']:
+        d = sample.loc[sample.parent_role == role]
+        for stage in ['early', 'later']:
+            for measure in ['single', 'average']:
+                x = np.log(d[f'p_{measure}'])
+                y = np.log(d[f'{stage}_{measure}'])
+                beta, intercept = np.polyfit(x, y, 1)
+                estimates.append(dict(parent=role, stage=stage, measure=measure,
+                                      ige=beta, n_children=len(d)))
+    estimates = pd.DataFrame(estimates)
+    print(estimates.round(3).to_string(index=False))
+    # END estimate
+    return estimates
+
+
+def kinship_clusters(sample):
+    """Keep shared people and original family lineages together, including both parents."""
+    roots = {}
+
+    def root(x):
+        roots.setdefault(x, x)
+        while roots[x] != x:
+            roots[x] = roots[roots[x]]
+            x = roots[x]
+        return x
+
+    def union(a, b):
+        ra, rb = root(a), root(b)
+        if ra != rb:
+            roots[rb] = ra
+
+    for r in sample.itertuples():
+        child, parent = ('p', r.child_id), ('p', r.parent_id)
+        union(child, parent)
+        union(child, ('f', r.family_id))
+        union(parent, ('f', r.parent_id // 1000))
+    return pd.Series([str(root(('p', c))) for c in sample.child_id], index=sample.index)
+
+
+def family_bootstrap(sample, estimates, draws=2000, seed=20261026):
+    sample = sample.copy()
+    sample['cluster'] = kinship_clusters(sample)
+    clusters = sorted(sample.cluster.unique())
+    index = {c:i for i,c in enumerate(clusters)}
+    g = len(clusters)
+    rng = np.random.default_rng(seed)
+    counts = rng.multinomial(g, np.full(g, 1/g), size=draws)
+    boot = []
+    for r in estimates.itertuples():
+        d = sample.loc[sample.parent_role == r.parent]
+        inverse = d.cluster.map(index).to_numpy()
+        x, y = np.log(d[f'p_{r.measure}']), np.log(d[f'{r.stage}_{r.measure}'])
+        moments = np.column_stack([np.bincount(inverse, weights=z, minlength=g)
+                                   for z in [np.ones(len(d)), x, y, x*x, x*y]])
+        n, sx, sy, sxx, sxy = (counts @ moments).T
+        slopes = (sxy-sx*sy/n)/(sxx-sx*sx/n)
+        if not np.isfinite(slopes).all():
+            raise ValueError('Degenerate bootstrap draw; inspect sample/cluster coverage.')
+        boot.append(slopes)
+    boot = np.column_stack(boot)
+    estimates = estimates.copy()
+    estimates['ci_low'], estimates['ci_high'] = np.quantile(boot,[.025,.975],axis=0)
+    return estimates, boot, sample
+
+
+def plot_results(estimates):
+    plt.rcParams.update({'font.family':'DejaVu Sans','font.size':11,
+                         'axes.spines.top':False,'axes.spines.right':False})
+    # Stack panels so labels remain readable on a phone.
+    fig, axes = plt.subplots(2, 1, figsize=(8, 8), sharex=True, sharey=True,
+                             constrained_layout=True)
+    colors = {'single':'#B35D45','average':'#287F8E'}
+    for ax, role in zip(axes,['mother','father']):
+        for j, measure in enumerate(['single','average']):
+            d = estimates.loc[(estimates.parent==role)&(estimates.measure==measure)]
+            d = d.set_index('stage').loc[['early','later']]
+            x = np.array([0.,1.]) + (-.12 if j==0 else .12)
+            ax.errorbar(x,d.ige,yerr=[d.ige-d.ci_low,d.ci_high-d.ige],fmt='o',
+                        color=colors[measure],markersize=8,linewidth=2,capsize=4,
+                        label='One observed year' if j==0 else 'Mean of 3+ observed years')
+            for xx, val in zip(x,d.ige):
+                ax.annotate(f'{val:.3f}',(xx,val),xytext=(-12 if j==0 else 12,8),
+                            textcoords='offset points',ha='right' if j==0 else 'left',
+                            color=colors[measure],fontweight='bold')
+        ax.axhline(0,color='#9CA3A5',linewidth=1)
+        ax.grid(axis='y',alpha=.2)
+        ax.set_axisbelow(True)
+        ax.set_ylabel('Intergenerational elasticity (IGE)')
+        ax.set_title(f'{role.capitalize()} and child',loc='left',fontweight='bold',fontsize=14)
+        ax.tick_params(labelbottom=True)
+    axes[0].legend(loc='upper left',frameon=False,ncol=2,fontsize=10)
+    axes[-1].set_xticks([0,1],['Child income at ages 20–29','Child income at ages 30–39'])
+    axes[-1].set_xlim(-.48,1.48)
+    axes[-1].set_ylim(min(0,estimates.ci_low.min()-.065),estimates.ci_high.max()+.16)
+    fig.suptitle('The same children, different income windows',fontsize=16,fontweight='bold')
+    (ROOT/'results/figures').mkdir(parents=True,exist_ok=True)
+    fig.savefig(ROOT/'results/figures/income_timing.png',dpi=180)
+    plt.close(fig)
+
+
+def run(work_dir, audit):
+    out = ROOT/'results'
+    out.mkdir(exist_ok=True)
+    con = load_tables(work_dir)
+    links = match_families(con)
+    sample = build_sample(con,links)
+    assert len(sample) > 0
+    assert sample.groupby('child_id').size().eq(2).all()
+    assert sample[['p_n','early_n','later_n']].ge(3).all().all()
+    estimates,boot,sample = family_bootstrap(sample,estimate(sample))
+    # This file is deliberately private. Only aggregate statistics go into results/.
+    sample.to_csv(Path(work_dir)/'matched_incomes.csv',index=False,float_format='%.10g')
+    estimates.to_csv(out/'ige_estimates.csv',index=False,float_format='%.10g')
+    flow = []
+    a = links.copy()
+    def add_flow(label, d):
+        flow.append(dict(step=label,children=int(d.child_id.nunique()),
+                         mother_links=int(d.parent_role.eq('mother').sum()),
+                         father_links=int(d.parent_role.eq('father').sum())))
+    add_flow('Documented parent-child links with parent in individual file',a)
+    for lo,hi,target,label,key in [(35,44,40,'Parent ages 35-44','parent_id'),
+                                  (20,29,25,'Add child ages 20-29','child_id'),
+                                  (30,39,35,'Add child ages 30-39','child_id')]:
+        d=summarize(con,lo,hi,target)
+        a=a.merge(d[['person_id']].rename(columns={'person_id':key}),on=key,validate='many_to_one')
+        add_flow(label+'; at least 3 observed amounts',a)
+    add_flow('All log inputs positive; both parents; common children',sample)
+    pd.DataFrame(flow).to_csv(out/'sample_flow.csv',index=False)
+    pd.DataFrame(audit['waves']).to_csv(out/'preparation_counts.csv',index=False)
+    by=pd.read_sql_query('SELECT id68*1000+pn AS person_id,birth_year FROM people',con).set_index('person_id').birth_year
+    births=by.loc[sample.child_id.unique()]
+    differences={}
+    for role in ['mother','father']:
+        idx1=estimates.index[(estimates.parent==role)&(estimates.stage=='early')&(estimates.measure=='average')][0]
+        idx2=estimates.index[(estimates.parent==role)&(estimates.stage=='later')&(estimates.measure=='average')][0]
+        differences[role]=dict(later_minus_early=float(estimates.loc[idx2,'ige']-estimates.loc[idx1,'ige']),
+                               ci=np.quantile(boot[:,idx2]-boot[:,idx1],[.025,.975]).tolist())
+    summary=dict(children=int(sample.child_id.nunique()),parent_child_pairs=len(sample),
+                 mothers=int(sample.loc[sample.parent_role=='mother','parent_id'].nunique()),
+                 fathers=int(sample.loc[sample.parent_role=='father','parent_id'].nunique()),
+                 original_child_families=int(sample.family_id.nunique()),kinship_clusters=int(sample.cluster.nunique()),
+                 largest_cluster_children=int(sample.drop_duplicates('child_id').groupby('cluster').size().max()),
+                 child_birth_min=int(births.min()),child_birth_max=int(births.max()),
+                 income_years=audit['income_years'],input_individuals=audit['individuals'],
+                 income_records=audit['income_records'],zero_income_records=audit['zero_income_records'],
+                 observation_counts={k:[int(sample[k].min()),int(sample[k].max())]
+                                     for k in ['p_n','early_n','later_n']},
+                 age_change_average=differences,bootstrap_draws=2000,bootstrap_seed=20261026,
+                 source_extract_sha256=audit['extract_sha256'])
+    (out/'analysis_summary.json').write_text(json.dumps(summary,indent=2)+'\n')
+    (out/'sessionInfo.txt').write_text(
+        f'Python {platform.python_version()}\nNumPy {np.__version__}\npandas {pd.__version__}\n'
+        f'Matplotlib {matplotlib.__version__}\nSQLite {sqlite3.sqlite_version}\n')
+    plot_results(estimates)
+    con.close()
+    print(estimates.to_string(index=False))
+    print(json.dumps(summary,indent=2))
+    return summary

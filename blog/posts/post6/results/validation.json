@@ -1,14 +1,73 @@
 {
-  "people": 2000,
-  "person_years": 15000,
-  "matched_pairs": 1000,
-  "unique_children": 1000,
-  "family_only_join_rows": 4000,
-  "same_pairs_in_all_four_estimates": true,
-  "duplicate_person_years": 0,
-  "missing_income_measures": 0,
-  "nonpositive_annual_incomes": 0,
-  "sql_parent_child_links_match_input": true,
-  "sql_mean_matches_independent_pandas_check": true,
-  "common_income_level_shift_preserves_slope": true
+  "analysis_date": "2026-10-26",
+  "source_zip": "J366685.zip",
+  "actual_microdata_analysis_run": true,
+  "end_to_end_replication_command_run": true,
+  "raw_records": 62218,
+  "fixed_record_width": 798,
+  "sql_links_match_independent_pandas_merge": [
+    {
+      "parent": "mother",
+      "links": 33786
+    },
+    {
+      "parent": "father",
+      "links": 23627
+    }
+  ],
+  "sql_means_and_anchors_match_pandas": true,
+  "all_eight_ols_match_independent_lstsq": true,
+  "article_python_blocks_executed_in_order": 5,
+  "article_point_estimates_match_saved_results": true,
+  "same_children_in_all_eight_specifications": 606,
+  "related_records_kept_in_bootstrap_clusters": true,
+  "parent_child_birth_year_gap_range": [
+    14,
+    36
+  ],
+  "raw_or_matched_microdata_in_publication_folder": false,
+  "live_website_deployed": false,
+  "quarto": {
+    "version": "1.10.19",
+    "article_rendered": true,
+    "blog_listing_rendered": true,
+    "isolated_existing_website_copy": true
+  },
+  "browser": {
+    "desktop": {
+      "width": 1365,
+      "documentWidth": 1365,
+      "mathElements": 8,
+      "codeCopyButtons": 5,
+      "brokenImages": []
+    },
+    "mobile": {
+      "width": 390,
+      "documentWidth": 390,
+      "mathElements": 8,
+      "codeCopyButtons": 5,
+      "brokenImages": []
+    },
+    "copyWorks": true,
+    "checkpointWorks": true,
+    "lightboxWorks": true,
+    "resources": {
+      "README.md": 200,
+      "code/tutorial.py": 200,
+      "code/run_analysis.py": 200,
+      "data/variable_manifest.json": 200,
+      "data/cpi.csv": 200,
+      "results/ige_estimates.csv": 200
+    },
+    "privateRequests": {
+      "psid.sqlite": 404,
+      "J366685.zip": 404,
+      "data/earnings.csv": 404,
+      "results/matched_incomes.csv": 404
+    },
+    "errors": [],
+    "listing_posts": 6,
+    "blog6_entries": 1
+  },
+  "article_approximate_words_excluding_code_yaml_and_display_equations": 781
 }

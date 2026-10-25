@@ -1,0 +1,25 @@
+Blog 6 - real PSID version - 2026-10-26
+
+Uses the user's uploaded J366685.zip PSID extract. The analysis was actually run.
+Both biological mother-child and father-child identifiers are matched in SQL.
+The same 606 children are used in all eight estimates. No simulated earnings or
+NLS microdata are used in this version.
+
+The short tutorial teaches SELECT, JOIN on both identifiers, UNION ALL, WHERE,
+GROUP BY, AVG, COUNT and HAVING. It compares single-year and multi-year income,
+explains the income owner's role, includes one check-your-answer exercise and
+one two-panel figure. Its numerical statements are generated from saved outputs.
+
+The publication folder contains aggregate results and reproducible code only.
+PSID individual records, prepared tables, the SQLite database and matched income
+records stay in a separate private working directory. Each replicator obtains
+their own PSID download; exact variables and the source fingerprint are supplied.
+
+Replace the entire blog/posts/post6 folder, then commit and push. The title and
+article URL are preserved. Other posts and the global website configuration are
+not modified. No local Python/Quarto run is needed merely to publish this version.
+
+Interpretation stays descriptive: the paternal single-year/multi-year difference
+is substantial in this selected sample; neither averaged age difference is
+precisely separated from zero. The tutorial does not assert a true lifetime IGE
+or a causal effect. The accompanying checklist is evidence, not a grade promise.

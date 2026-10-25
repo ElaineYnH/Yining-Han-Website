@@ -1,0 +1,56 @@
+{
+  "psid": {
+    "title": "Panel Study of Income Dynamics, public-use dataset",
+    "provider": "Survey Research Center, Institute for Social Research, University of Michigan",
+    "url": "https://psidonline.isr.umich.edu/",
+    "data_center": "https://simba.isr.umich.edu/",
+    "identifiers_and_roles": "https://psidonline.isr.umich.edu/Guide/FAQ.aspx",
+    "conditions": "https://simba.isr.umich.edu/U/CondUse.aspx",
+    "user_supplied_extract": "J366685.zip",
+    "extract_download_date": "2026-10-25",
+    "extract_sha256": "56fabedbc986cf907ed1b547b310ea7dc2cba0ca74f551a4245626788fa081c9",
+    "raw_microdata_in_publication_package": false,
+    "survey_waves": [
+      1994,
+      1995,
+      1996,
+      1997,
+      1999,
+      2001,
+      2003,
+      2005,
+      2007,
+      2009,
+      2011,
+      2013,
+      2015,
+      2017,
+      2019,
+      2021,
+      2023
+    ]
+  },
+  "cpi": {
+    "provider": "U.S. Bureau of Labor Statistics",
+    "series": "CUUR0000SA0",
+    "period": "M13 annual average",
+    "base_year": 2020,
+    "base_value": 258.811,
+    "file_sha256": "750ad4028d977ada49bd12ec00b4c2a21112789576d154a70c2a6cd7d13cd99e",
+    "documentation": "https://www.bls.gov/cpi/factsheets/purchasing-power-constant-dollars.htm",
+    "api_documentation": "https://www.bls.gov/developers/api_signature_v2.htm"
+  },
+  "reference": {
+    "authors": [
+      "Steven Haider",
+      "Gary Solon"
+    ],
+    "year": 2006,
+    "title": "Life-Cycle Variation in the Association between Current and Lifetime Earnings",
+    "journal": "American Economic Review",
+    "volume": "96(4)",
+    "pages": "1308-1320",
+    "doi": "10.1257/aer.96.4.1308",
+    "url": "https://www.aeaweb.org/articles?id=10.1257/aer.96.4.1308"
+  }
+}

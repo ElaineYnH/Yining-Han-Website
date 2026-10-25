@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+*.sqlite
+*.sqlite-*
+*.dta
+J*.zip
+J*.txt
+J*.do
+*_codebook.pdf
+data/raw/
+private/

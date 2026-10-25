@@ -1,79 +1,101 @@
-BLOG POST 6 — EVIDENCE CHECK, 2026-10-23
+BLOG 6 - RUBRIC EVIDENCE - PSID VERSION - 2026-10-26
 
-Sources reviewed
-Current Blog_posts_project_memory.md (version 2), the formal Blog Posts
-prompt, and blog_post_rubric.pdf. The instructor's October 21 announcement
-was read: it moves Blog 6 to Friday but gives no exact time. The live Canvas
-assignment's time and time zone have not been independently verified.
+Sources read before writing: current Blog_posts_project_memory.md (version 2),
+formal Blog_Posts prompt and blog_post_rubric.pdf. The post is a short tutorial
+for students with basic Python/SQL. No specific dataset or figure count is
+mandated for Post 6. One two-panel figure answers the central question.
 
-Format
-A compact tutorial: task, actual short Python/SQL code, generated output,
-explanation, and one reveal-answer checkpoint. Approximately 600 words of
-prose, excluding code, tables, figure, and source footer; one substantive
-figure. Blog 6 does not impose Blog 3/4's three-figure requirement.
+SIX COMMON ITEMS
 
-Six common criteria
-1. Question and motivation: opening asks whether observing the same families
-   at different ages can change their apparent income association.
-2. Clear explanation: four numbered steps explain loading, the relationship
-   join, per-person aggregation, and the log-log elasticity. A short example
-   gives the percent-change interpretation.
-3. Interpretation and takeaway: contrasts young vs. midcareer estimates,
-   then single-year vs. five-year measures, on a common set of pairs. Explains
-   why averaging early-career income can leave life-cycle bias.
-4. Data and presentation: clearly labeled simulated data, fixed seed,
-   constant-dollar units, input schema, a known assumed benchmark, generated
-   tables and figure, and primary methodological/documentation links.
-5. Repository organization: code/, data/, results/, requirements, and README
-   with actual commands and installation/publication instructions.
-6. Reproducibility: the lesson runs SQL, saves matched incomes and estimates,
-   and inserts the executed code and computed numbers into a static article.
-   The generator and all inputs are included for an offline full rebuild.
+1. Question and motivation
+   Opening question asks whether measuring child earnings in the twenties or
+   thirties changes the parent-child association. The result paragraph shows
+   why measurement choices change the apparent strength of income persistence.
+   A single-year paternal IGE of 0.055/0.118 becomes 0.274/0.323 using averages.
 
-Four Blog 6 criteria
-7. SQL in Python and identifiers: sqlite3 + pandas; a self-join uses explicit
-   parent_id/person_id links and checks origin-family IDs. Repeated person-
-   year observations supply longitudinal incomes. The panel is simulated.
-8. SELECT/JOIN/GROUP BY/aggregation: explained alongside the actual working
-   queries; AVG, WHERE, HAVING, and bound parameters are also explained.
-   The checkpoint demonstrates the 4,000-row family-only join error.
-9. Income measures and IGE: six constructed income measures, four IGE
-   estimates using single-year and five-year income, intercept included,
-   levels averaged before logs, same 1,000 pairs in every comparison.
-10. Life-cycle bias and averaging: known generating beta 0.50, early-career
-    gaps deliberately compressed, young vs. midcareer comparison with the
-    parental single-year measure held fixed. Five-year averages reduce
-    transitory variation but leave the early-career compression. The text
-    does not equate every change in an empirical estimate with proof of bias.
+2. Clear explanation
+   Four numbered steps, five consecutive runnable Python blocks, plain-language
+   explanations of SQL and income ownership, and a reveal-answer exercise.
+   Explains arithmetic means before logs and the percentage interpretation of IGE.
 
-Checks actually completed
-- Generated the panel using seed 20261023 and executed the full SQL lesson.
-- Verified person and person-year keys, positive incomes, chronological ages,
-  exact relationship matches, common pairs, and complete income windows.
-- Cross-checked SQL means independently with pandas.
-- Verified that a common income-level shift leaves the elasticity unchanged.
-- Generated all four estimates, identifier preview, article, and figure.
+3. Interpretation and takeaway
+   Interprets the eight actual estimates for the same 606 children. Separates
+   maternal/paternal associations and avoids causal claims. Reports the paired
+   age-difference interval, including zero; does not label the older slope true.
+   Ends with concrete advice: aggregate first, use several observations at
+   economically comparable ages, and report ages and the selected sample.
 
-- Regenerated the supplied data from the fixed seed and rebuilt all outputs.
-- Executed the five Python blocks exactly as shown in the published article,
-  in order, and reproduced the saved estimates.
-- Rendered blog6.qmd and blog/index.qmd with Quarto 1.10.19.
-- Inspected the figure and rendered desktop/mobile pages.
-- Tested the actual code-copy button, expandable answer, figure enlargement,
-  loaded figure, simulated-data disclosure, and local article links.
-- Checked 390-pixel mobile width: code blocks scroll internally and the page
-  has no horizontal overflow.
-- Checked the listing: six articles, including exactly one Blog 6 entry.
-- Verified that tracked source files outside the new post6 were unchanged.
+4. Data and presentation
+   Uses the actual user-supplied PSID J366685.zip public-use extract and BLS CPI.
+   README/source manifest identify date, exact variables, wave/role/year rules,
+   source links and ZIP fingerprint. Figure has age windows, IGE axis, numeric
+   labels, parent-specific panels, single/average legend and bootstrap intervals.
+   Figure note documents source, parent window, cluster count and 2,000 draws.
 
-The build and browser checks cover this article and the listing, not execution
-of all older posts or a remote deployment. Installation and publication are
-left to the user's existing commit/push workflow.
+5. Repository organization
+   code/, data/ and results/ with root README and dependencies. The README gives
+   exact Windows commands and cross-platform equivalents. Individual PSID data
+   are held outside the repository; each replicator registers and obtains their
+   own extract. The required variable manifest permits reconstructing the input.
+   Notes are .txt so they do not create extra Quarto blog entries.
 
-Evidence boundaries
-No real-world income estimates, survey microdata, population weighting,
-statistical significance, or causal education/income effects are claimed.
-The model is a teaching illustration with disclosed assumptions; the stated
-0.50 is a generating parameter, not a national empirical benchmark.
-This checklist documents evidence; it is not a prediction or guarantee of
-a grade.
+6. Reproducibility and coding practices
+   Actual fixed-width input read from .do positions. SQL constructs links and
+   aggregates income; NumPy estimates slopes. Seeded bootstrap, result CSV/JSON,
+   figure and article are generated programmatically. Wrapper was actually run
+   end-to-end from a fresh private directory. Five displayed blocks were executed
+   in order and agree with saved estimates. Data access remains required to
+   independently replicate; the package does not redistribute individual records.
+
+FOUR POST 6 ITEMS
+
+7. SQL within Python, individual/family identifiers, parent-child matching
+   tutorial.py: match_families uses sqlite3 and a CTE with mother and father
+   identifiers, UNION ALL, and JOIN on original family identifier AND person
+   number. Unknown/unobserved-parent codes are excluded. IDs combine id68 and pn
+   only for subsequent convenience; family ID alone never asserts parenthood.
+   Matching agrees with a separately computed pandas merge of both identifiers.
+
+8. SELECT, JOIN, GROUP BY and aggregation
+   Steps 2/3 explicitly explain SELECT, JOIN ON, WHERE, GROUP BY, AVG, COUNT and
+   HAVING. A 4-by-3 annual-record exercise demonstrates the duplication problem.
+   SQL averages/counts and nearest-age anchors agree with independent pandas
+   calculations. Each role contributes one parent-child row after aggregation.
+
+9. Construct incomes, single-year/multi-year IGE
+   prepare_data.py assigns individual labor earnings by actual reference/spouse
+   role and sequence, uses income-year age, valid special codes, released
+   imputations and CPI-adjusted dollars. Parent window 35-44; child 20-29 and
+   30-39; at least three observed income years. Singles nearest ages 40/25/35,
+   earlier-year tie break. Means retain eligible zeros; positive log inputs and
+   both-parent coverage keep the same 606 children across all eight fits. OLS
+   includes an intercept; the independent least-squares calculation agrees.
+
+10. Life-cycle bias and why averaging helps
+   Final section gives an age-dependent loading equation. Under the stated
+   assumptions the measured slope is lambda_t times the lifetime IGE, so a
+   loading different from one biases the measured elasticity. A clearly labeled
+   hypothetical parameter illustration makes the difference numerical; it is
+   not simulated PSID data. Cites Haider and Solon (2006) for the empirical basis
+   of age-dependent current/lifetime earnings relationships. The actual PSID
+   age-window comparison illustrates sensitivity but cannot identify the true
+   lifetime slope or isolate age from period effects. Explains parent-X noise
+   reduction, child-income smoothing and the limits of twenties-only averages.
+
+PROJECT-MEMORY CHECK
+
+Blog 2: The question requires longitudinal individual records and exact family
+relationships; it cannot be answered by manually copying a few website numbers.
+The practical recommendation is tied to the actual measurement sensitivity.
+
+Blog 3: Both panels use the same age windows and children and jointly answer
+the one question. No filler graphics or unsupported economic mechanisms.
+
+LIMITS
+
+This checklist records implementation evidence, not a guaranteed grade.
+The results describe a selected unweighted sample with both parents observed.
+Age-difference intervals include zero. Published PSID imputations are retained.
+The public package intentionally requires registered access for raw-data
+replication. See results/validation.json for completed runtime/render checks;
+local validation does not constitute publication to the live website.
