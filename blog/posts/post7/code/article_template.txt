@@ -1,0 +1,74 @@
+---
+title: "Lower Inflation, Higher Prices"
+author: "Yining Han"
+date: 2026-10-26
+description: "Which everyday prices have fallen? An interactive comparison of groceries, rent, and gasoline using two starting dates."
+categories: [Plotly, Inflation, Data Visualization]
+image: results/cover.svg
+image-alt: "Changes in overall, grocery, rent, and gasoline prices since January 2020."
+format: html
+resources:
+  - README.md
+  - requirements.txt
+  - code/**
+  - data/**
+  - results/**
+  - assets/**
+---
+
+When news reports that inflation has slowed, it is easy to read that as relief at the checkout. But a slower rate of increase can coexist with a much higher bill. **Which everyday prices have actually fallen, and does the answer change when the comparison starts before the pandemic rather than at the 2022 inflation peak?** I compare groceries, primary-residence rent, and gasoline with the overall U.S. consumer price index.
+
+## Two ways to ask whether prices fell
+
+The data are four monthly [BLS consumer price indexes distributed through FRED](https://fred.stlouisfed.org/release?rid=10), all seasonally adjusted and measured for the U.S. city average. This downloaded snapshot covers January 2019 through {{END_LONG}}. The 2019 observations allow annual comparisons beginning in 2020. These are category price indexes, rather than dollars paid by an individual household.
+
+Start with **Price change** and **January 2020** as the baseline. Hover over a month for exact values and use the checkboxes to isolate categories. Then choose **June 2022**, when annual all-items inflation peaked within this sample. Finally, switch to **Annual inflation**, which compares each month with the same month one year earlier. Changing the baseline recalculates the percentage changes; it does more than zoom the axis. The same category can therefore give different answers to “Have prices fallen?”
+
+```{=html}
+<iframe id="blog7-explorer" src="results/price_explorer.html" title="Interactive comparison of U.S. price changes and annual inflation" style="width:100%;height:820px;border:0;display:block;" loading="eager"></iframe>
+<script>
+window.addEventListener('message', function(event) {
+  const frame = document.getElementById('blog7-explorer');
+  if (frame && event.source === frame.contentWindow && event.data && event.data.type === 'blog7-chart-height') {
+    const height = Number(event.data.height);
+    if (Number.isFinite(height) && height > 0) frame.style.height = Math.max(650, Math.min(1800, Math.ceil(height) + 8)) + 'px';
+  }
+});
+</script>
+```
+
+[Open the interactive chart in a separate tab](results/price_explorer.html){target="_blank" rel="noopener"}.
+
+*All changes below end in {{END_LONG}}. Annual inflation compares with the same month one year earlier.*
+
+::: {.table-responsive .small}
+
+{{SNAPSHOT_TABLE}}
+
+:::
+
+## Slower inflation leaves earlier increases in place
+
+All-items annual inflation, calculated from these series, declined from **{{ALL_PEAK}}% in {{ALL_PEAK_DATE}} to {{ALL_YOY}}% in {{END_LONG}}**. Yet the overall price index was **{{ALL_2020}}% above January 2020**. Grocery prices were {{FOOD_2020}}% higher and rent {{RENT_2020}}% higher. The difference is between the rate of increase and the price level: positive inflation means prices are still rising, even when the rate is smaller than before.
+
+Viewed from June 2022, groceries were up {{FOOD_2022}}% and rent {{RENT_2022}}%. Their annual inflation rates at the endpoint were {{FOOD_YOY}}% and {{RENT_YOY}}%, respectively. Those smaller annual rates did not undo the accumulated increases. News about disinflation therefore should not be read as a return to older price levels.
+
+These category differences also matter when interpreting the overall index. CPI combines many categories using expenditure weights; the three components shown here are selected examples, and their simple average would not reproduce the overall index. A reader interested in a particular expense can isolate its series instead of assuming that the overall path describes every bill.
+
+## Gasoline changes the answer when the baseline changes
+
+Selecting June 2022 makes gasoline **{{GAS_2022_ABS}}% cheaper** by {{END_LONG}}. Changing the baseline to January 2020 instead shows a **{{GAS_2020}}% increase**. June 2022 began at a much higher price level, so both comparisons can be correct. The baseline control lets the reader check whether “cheaper” refers to a recent high or a pre-pandemic benchmark.
+
+Gasoline was also {{GAS_YOY}}% more expensive than one year earlier at the endpoint. Its decline relative to June 2022 does not mean prices fell continuously afterward. Switching to the annual view reveals the reversals that a comparison of two endpoints alone would miss.
+
+## What the comparison can tell us
+
+I calculate cumulative change as $100(P_t/P_b-1)$, where $b$ is the selected baseline, and annual inflation as $100(P_t/P_{t-12}-1)$. Monthly dates remain in place. Overall CPI, groceries, and rent have no October 2025 observation in the supplied file; I leave those gaps and retain gasoline's available observation. Rates are calculated only when both required observations exist.
+
+These [seasonally adjusted calculations](https://www.bls.gov/cpi/seasonal-adjustment/using-seasonally-adjusted-data.htm) can differ from published, unadjusted twelve-month CPI changes. The national indexes also do not measure one household's spending or show whether wages kept up. They describe price changes, so they cannot establish changes in household welfare by themselves.
+
+**The takeaway is to specify both the expense and the comparison date.** In this snapshot, groceries and rent remained above both benchmarks. Gasoline was below its June 2022 level but well above January 2020. Lower inflation and lower prices are different claims, and the interactive comparison makes their difference visible.
+
+## Data and replication
+
+[Replication instructions](README.md), [Python builder](code/build_blog7.py), [original FRED download](data/fredgraph.csv), and [calculated results](results/summary.csv) are included. Individual series: [all items](https://fred.stlouisfed.org/series/CPIAUCSL), [groceries](https://fred.stlouisfed.org/series/CUSR0000SAF11), [rent](https://fred.stlouisfed.org/series/CUSR0000SEHA), and [gasoline](https://fred.stlouisfed.org/series/CUSR0000SETB01).

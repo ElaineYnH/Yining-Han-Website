@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Everyday prices: change the comparison date</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #fff; color: #1b2a3c; font: 15px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+    .explorer { padding: 22px 20px 14px; border: 1px solid #dbe2ea; border-radius: 12px; max-width: 1100px; margin: 0 auto; }
+    h1 { margin: 0 0 6px; font-size: clamp(20px, 3vw, 26px); line-height: 1.25; }
+    .subtitle { margin: 0 0 18px; color: #526174; font-size: 13px; }
+    .controls { display: flex; flex-wrap: wrap; gap: 14px 24px; align-items: start; }
+    .control-label { display: block; font-size: 12px; font-weight: 700; margin: 0 0 6px; color: #526174; }
+    .view-buttons { display: flex; border: 1px solid #c6d0dd; border-radius: 7px; padding: 3px; background: #f4f7fa; gap: 3px; }
+    button, select { font: inherit; }
+    button { cursor: pointer; border: 0; border-radius: 4px; padding: 8px 12px; background: transparent; color: #33475e; }
+    .view-buttons button[aria-pressed="true"] { background: #203d65; color: #fff; }
+    button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px solid #5596de; outline-offset: 3px; }
+    select { height: 44px; border: 1px solid #c6d0dd; background: #fff; color: #20334b; border-radius: 6px; padding: 7px 32px 7px 10px; }
+    select:disabled { background: #f2f4f7; color: #65758a; }
+    .shortcuts { display: inline-flex; gap: 3px; margin-left: 4px; }
+    .shortcuts button { color: #2458a6; font-size: 12px; padding: 9px 5px; text-decoration: underline; text-underline-offset: 3px; }
+    .shortcuts button:disabled { color: #6d7a8a; text-decoration: none; cursor: default; }
+    #comparison-note { color: #536478; font-size: 12px; margin: 9px 0 14px; min-height: 18px; }
+    fieldset { border: 0; margin: 0 0 14px; padding: 0; }
+    legend { font-size: 12px; color: #526174; font-weight: 700; margin-bottom: 5px; }
+    .series-options { display: flex; flex-wrap: wrap; gap: 8px 15px; }
+    .series-option { display: flex; align-items: center; gap: 6px; cursor: pointer; border-radius: 4px; padding: 3px 0; font-size: 13px; }
+    .series-option input { width: 16px; height: 16px; margin: 0; cursor: pointer; accent-color: var(--series-color); }
+    .swatch { width: 18px; height: 3px; background: var(--series-color); display: inline-block; }
+    .cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; }
+    .card { padding: 11px 12px 10px; background: #f6f8fb; border: 1px solid #e3e8ef; border-top: 3px solid var(--series-color); border-radius: 6px; }
+    .card-name { font-size: 12px; font-weight: 600; color: #526174; }
+    .card-value { font-size: clamp(22px, 3.7vw, 29px); font-weight: 700; line-height: 1.3; font-variant-numeric: tabular-nums; }
+    .card-subtitle { font-size: 11px; color: #647388; }
+    .chart-title { margin: 18px 0 0; font-size: 14px; font-weight: 650; }
+    #price-chart { width: 100%; height: 420px; }
+    .chart-help { margin: 6px 0 8px; font-size: 12px; color: #526174; }
+    .source-note { border-top: 1px solid #e5eaf0; padding-top: 9px; margin: 10px 0 0; font-size: 11px; color: #647388; }
+    #load-error { background: #fff2e7; color: #733a0b; padding: 12px; border-radius: 5px; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    @media (max-width: 540px) {
+      .explorer { padding: 17px 10px 12px; border-radius: 8px; }
+      .controls { gap: 12px; }
+      .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .card { padding: 9px 10px; }
+      .shortcuts { margin-left: 0; }
+      #price-chart { height: 390px; }
+      .chart-help { font-size: 11px; }
+    }
+  </style>
+  <script>{{PLOTLY_JS}}</script>
+</head>
+<body>
+  <main class="explorer" id="explorer">
+    <h1>Have everyday prices become cheaper?</h1>
+    <p class="subtitle" id="subtitle"></p>
+    <div class="controls">
+      <div>
+        <span class="control-label" id="view-label">Choose a measure</span>
+        <div class="view-buttons" role="group" aria-labelledby="view-label">
+          <button type="button" id="price-view" aria-pressed="true">Price change</button>
+          <button type="button" id="annual-view" aria-pressed="false">Annual inflation</button>
+        </div>
+      </div>
+      <div>
+        <label class="control-label" for="baseline">Compare prices with</label>
+        <select id="baseline" aria-describedby="comparison-note"></select>
+        <span class="shortcuts">
+          <button type="button" id="base-2020">Jan 2020</button>
+          <button type="button" id="base-2022">Jun 2022</button>
+        </span>
+      </div>
+    </div>
+    <p id="comparison-note"></p>
+    <fieldset>
+      <legend>Show categories</legend>
+      <div id="series-options" class="series-options"></div>
+    </fieldset>
+    <div id="cards" class="cards"></div>
+    <p id="status" class="sr-only" role="status" aria-live="polite"></p>
+    <h2 id="chart-title" class="chart-title"></h2>
+    <div id="price-chart" role="img" aria-label="Interactive monthly price changes for selected U.S. consumer price categories"></div>
+    <p id="load-error" hidden>The chart could not load. The accompanying article and CSV contain the reported results.</p>
+    <p class="chart-help">Hover for monthly values. Drag to zoom; double-click to reset. Changing the comparison month recalculates the price changes. Zooming only changes the display.</p>
+    <p class="source-note">Source: U.S. Bureau of Labor Statistics via FRED. All series are seasonally adjusted. Index changes are not dollar prices. Missing October 2025 values for all items, groceries, and rent remain gaps.</p>
+  </main>
+  <script type="application/json" id="price-data">{{DATA_JSON}}</script>
+  <script>
+    'use strict';
+    const DATA = JSON.parse(document.getElementById('price-data').textContent);
+    const state = {view: 'price', baseline: '2020-01-01', selected: new Set(DATA.series.map(s => s.id))};
+    const chart = document.getElementById('price-chart');
+    const baseline = document.getElementById('baseline');
+    const formatMonth = (d, short = false) => new Date(d + 'T12:00:00Z').toLocaleDateString('en-US', {month: short ? 'short' : 'long', year: 'numeric', timeZone: 'UTC'});
+    const signed = v => v === null || !Number.isFinite(v) ? 'Unavailable' : (v > 0 ? '+' : '') + v.toFixed(1) + '%';
+    const change = (a, b) => a === null || b === null ? null : 100 * (a / b - 1);
+    let renderCount = 0;
+    let rendering = Promise.resolve();
+    let compactLayout = window.innerWidth < 540;
+
+    document.getElementById('subtitle').textContent = 'U.S. city average, monthly data through ' + DATA.endpointLabel + '.';
+    for (const d of DATA.baseOptions) {
+      const option = document.createElement('option');
+      option.value = d; option.textContent = formatMonth(d);
+      baseline.appendChild(option);
+    }
+    baseline.value = state.baseline;
+    for (const s of DATA.series) {
+      const label = document.createElement('label');
+      label.className = 'series-option'; label.style.setProperty('--series-color', s.color);
+      const input = document.createElement('input');
+      input.type = 'checkbox'; input.value = s.id; input.checked = true;
+      input.setAttribute('aria-label', 'Show ' + s.label);
+      input.addEventListener('change', () => {
+        if (input.checked) state.selected.add(s.id); else state.selected.delete(s.id);
+        for (const box of document.querySelectorAll('.series-option input')) box.disabled = state.selected.size === 1 && box.checked;
+        update();
+      });
+      const swatch = document.createElement('span'); swatch.className = 'swatch'; swatch.setAttribute('aria-hidden', 'true');
+      label.append(input, swatch, document.createTextNode(s.label));
+      document.getElementById('series-options').appendChild(label);
+    }
+
+    function notifyHeight() {
+      window.parent.postMessage({type: 'blog7-chart-height', height: document.getElementById('explorer').offsetHeight}, '*');
+    }
+
+    function render() {
+      const price = state.view === 'price';
+      const baseIndex = DATA.dates.indexOf(state.baseline);
+      const baseLabel = formatMonth(state.baseline);
+      baseline.disabled = !price;
+      document.getElementById('base-2020').disabled = !price;
+      document.getElementById('base-2022').disabled = !price;
+      document.getElementById('price-view').setAttribute('aria-pressed', String(price));
+      document.getElementById('annual-view').setAttribute('aria-pressed', String(!price));
+      document.getElementById('comparison-note').textContent = price
+        ? 'Zero means the same price level as ' + baseLabel + '. End values refer to ' + DATA.endpointLabel + '.'
+        : 'Annual inflation compares with the same month one year earlier; it does not use the selected price baseline.';
+      const cards = document.getElementById('cards'); cards.replaceChildren();
+      const traces = [];
+      const status = [];
+      for (const s of DATA.series.filter(s => state.selected.has(s.id))) {
+        const y = price ? s.prices.map((v, i) => i < baseIndex ? null : change(v, s.prices[baseIndex])) : s.annual;
+        const value = y[y.length - 1];
+        const card = document.createElement('div'); card.className = 'card'; card.dataset.series = s.id;
+        card.style.setProperty('--series-color', s.color);
+        const name = document.createElement('div'); name.className = 'card-name'; name.textContent = s.label;
+        const number = document.createElement('div'); number.className = 'card-value'; number.textContent = signed(value);
+        const note = document.createElement('div'); note.className = 'card-subtitle';
+        note.textContent = price ? 'since ' + formatMonth(state.baseline, true) : 'from one year earlier';
+        card.append(name, number, note); cards.appendChild(card);
+        status.push(s.label + ': ' + signed(value));
+        const details = s.prices.map((v, i) => [v === null ? 'Unavailable' : v.toFixed(3), signed(s.annual[i])]);
+        traces.push({
+          type: 'scatter', mode: 'lines', name: s.label, x: DATA.dates, y,
+          customdata: details, connectgaps: false,
+          line: {color: s.color, width: 2.7, dash: s.dash},
+          hovertemplate: '<b>' + s.label + '</b><br>' + (price ? 'Since ' + baseLabel : 'From one year earlier') + ': %{y:.1f}%<br>CPI index: %{customdata[0]}<br>Annual inflation: %{customdata[1]}<extra></extra>',
+        });
+      }
+      document.getElementById('chart-title').textContent = price ? 'Price change since ' + baseLabel + ' (%)' : 'Annual inflation (%)';
+      document.getElementById('status').textContent = DATA.endpointLabel + '. ' + status.join('. ');
+      const compact = window.innerWidth < 540;
+      const layout = {
+        autosize: true, height: compact ? 390 : 420,
+        margin: {l: compact ? 46 : 54, r: 15, t: 20, b: 38},
+        paper_bgcolor: '#fff', plot_bgcolor: '#fff', showlegend: false,
+        font: {family: 'system-ui, -apple-system, Segoe UI, sans-serif', size: compact ? 11 : 12, color: '#40536a'},
+        hovermode: 'x unified', hoverlabel: {font: {size: compact ? 10 : 12}},
+        xaxis: {type: 'date', range: [price ? state.baseline : DATA.dates[0], DATA.endpoint],
+                showgrid: false, tickformat: '%Y', nticks: compact ? 4 : 7, fixedrange: false, automargin: true},
+        yaxis: {ticksuffix: '%', tickformat: '.0f', gridcolor: '#e5eaf0', zeroline: true,
+                zerolinecolor: '#8b9bb0', zerolinewidth: 1, autorange: true, fixedrange: false, automargin: true},
+        dragmode: 'zoom', transition: {duration: 0},
+      };
+      const config = {responsive: true, displaylogo: false, scrollZoom: false,
+                      modeBarButtonsToRemove: ['lasso2d', 'select2d'],
+                      toImageButtonOptions: {format: 'png', filename: 'everyday_prices', scale: 2}};
+      const operation = chart.data ? Plotly.react(chart, traces, layout, config) : Plotly.newPlot(chart, traces, layout, config);
+      return operation.then(() => { renderCount++; window.blog7Ready = true; notifyHeight(); });
+    }
+
+    function update() {
+      window.blog7Ready = false;
+      rendering = rendering.then(render).catch(error => {
+        document.getElementById('load-error').hidden = false;
+        document.getElementById('status').textContent = 'The chart could not load.';
+        window.blog7Error = String(error);
+        console.error(error); notifyHeight();
+      });
+      return rendering;
+    }
+    function setBaseline(value) { state.baseline = value; baseline.value = value; return update(); }
+    baseline.addEventListener('change', () => setBaseline(baseline.value));
+    document.getElementById('base-2020').addEventListener('click', () => setBaseline('2020-01-01'));
+    document.getElementById('base-2022').addEventListener('click', () => setBaseline('2022-06-01'));
+    document.getElementById('price-view').addEventListener('click', () => {state.view = 'price'; update();});
+    document.getElementById('annual-view').addEventListener('click', () => {state.view = 'annual'; update();});
+    new ResizeObserver(() => notifyHeight()).observe(document.getElementById('explorer'));
+    window.addEventListener('resize', () => {
+      const nextCompact = window.innerWidth < 540;
+      if (nextCompact !== compactLayout) {
+        compactLayout = nextCompact;
+        update();
+      } else if (chart.data) {
+        Plotly.Plots.resize(chart).then(notifyHeight);
+      } else {
+        notifyHeight();
+      }
+    });
+    window.blog7Debug = () => ({view: state.view, baseline: state.baseline, selected: [...state.selected], renderCount});
+    update();
+  </script>
+</body>
+</html>

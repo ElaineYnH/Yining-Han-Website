@@ -1,0 +1,57 @@
+{
+  "endpoint": "2026-09-01",
+  "series": [
+    {
+      "series_id": "CPIAUCSL",
+      "category": "All items",
+      "endpoint": "2026-09-01",
+      "latest_price_index": 336.298,
+      "january2020_price_index": 259.127,
+      "june2022_price_index": 294.957,
+      "change_since_jan2020_pct": 29.78114978369679,
+      "change_since_jun2022_pct": 14.015941306698942,
+      "annual_inflation_pct": 3.7172508442689933,
+      "peak_annual_inflation_pct": 8.979361103105798,
+      "peak_annual_inflation_month": "2022-06-01"
+    },
+    {
+      "series_id": "CUSR0000SAF11",
+      "category": "Groceries",
+      "endpoint": "2026-09-01",
+      "latest_price_index": 321.111,
+      "january2020_price_index": 243.511,
+      "june2022_price_index": 288.568,
+      "change_since_jan2020_pct": 31.867143578729507,
+      "change_since_jun2022_pct": 11.27741121676693,
+      "annual_inflation_pct": 1.7655447803764934,
+      "peak_annual_inflation_pct": 13.585991456514135,
+      "peak_annual_inflation_month": "2022-08-01"
+    },
+    {
+      "series_id": "CUSR0000SEHA",
+      "category": "Rent",
+      "endpoint": "2026-09-01",
+      "latest_price_index": 450.429,
+      "january2020_price_index": 337.591,
+      "june2022_price_index": 368.216,
+      "change_since_jan2020_pct": 33.42446925421589,
+      "change_since_jun2022_pct": 22.32738392682554,
+      "annual_inflation_pct": 2.782056284613099,
+      "peak_annual_inflation_pct": 8.808578654751265,
+      "peak_annual_inflation_month": "2023-03-01"
+    },
+    {
+      "series_id": "CUSR0000SETB01",
+      "category": "Gasoline",
+      "endpoint": "2026-09-01",
+      "latest_price_index": 376.558,
+      "january2020_price_index": 242.397,
+      "june2022_price_index": 409.671,
+      "change_since_jan2020_pct": 55.34763219016736,
+      "change_since_jun2022_pct": -8.082827439579566,
+      "annual_inflation_pct": 34.169701202174885,
+      "peak_annual_inflation_pct": 59.83730321296892,
+      "peak_annual_inflation_month": "2022-06-01"
+    }
+  ]
+}

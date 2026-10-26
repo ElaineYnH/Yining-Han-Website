@@ -1,0 +1,35 @@
+{
+  "input_filename": "data/fredgraph.csv",
+  "input_sha256": "a9a5bc1a446bc844edacbd0e1ddab5a5ae1f0797294b99cb22fa2e56f427161f",
+  "raw_rows": 897,
+  "analysis_start": "2019-01-01",
+  "analysis_end": "2026-09-01",
+  "calendar_months_in_analysis": 93,
+  "complete_months_in_analysis": 92,
+  "missing_by_series": {
+    "CPIAUCSL": [
+      "2025-10-01"
+    ],
+    "CUSR0000SAF11": [
+      "2025-10-01"
+    ],
+    "CUSR0000SEHA": [
+      "2025-10-01"
+    ],
+    "CUSR0000SETB01": []
+  },
+  "missing_value_policy": "No imputation or forward-fill. Calendar dates are retained. Rates require both observed endpoints.",
+  "units": "Original index: 1982-1984=100. Computed changes: percent.",
+  "frequency": "Monthly",
+  "adjustment": "Seasonally adjusted",
+  "sources": {
+    "CPIAUCSL": "https://fred.stlouisfed.org/series/CPIAUCSL",
+    "CUSR0000SAF11": "https://fred.stlouisfed.org/series/CUSR0000SAF11",
+    "CUSR0000SEHA": "https://fred.stlouisfed.org/series/CUSR0000SEHA",
+    "CUSR0000SETB01": "https://fred.stlouisfed.org/series/CUSR0000SETB01"
+  },
+  "snapshot_provenance": "Original FRED CSV downloaded and uploaded by the author; preserved byte for byte.",
+  "post_date": "2026-10-27",
+  "plotly_version": "4.1.1",
+  "plotly_asset_sha256": "3b6e15d45dbb7fca5bd2094291e961ddc5472cd887009e6009a56dab668d721f"
+}

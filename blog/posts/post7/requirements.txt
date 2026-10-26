@@ -1,0 +1,4 @@
+# Python 3.10 or newer. The builder uses only the standard library.
+# No pip packages are required.
+# Plotly.js 4.1.1 is vendored in assets/ and embedded in the generated HTML.
+# Rendering the article requires Quarto, already used by the existing website.
