@@ -23,7 +23,7 @@ https://github.com/ElaineYnH/Yining-Han-Website
 - `code/build_blog7.py`: validation, calculations, data exports, article generation, and thumbnail generation.
 - `code/article_template.txt`: article text with numerical fields filled from calculated results.
 - `code/explorer_template.html`: readable HTML, CSS, and JavaScript for the Plotly visualization.
-- `code/VERIFICATION.md`: evidence for the ten rubric criteria and the checks actually performed.
+- `code/VERIFICATION.txt`: evidence for the ten rubric criteria and the checks actually performed.
 - `assets/plotly-4.1.1.min.js`: official Plotly.js distribution under its included MIT license.
 - `results/price_explorer.html`: generated, self-contained interactive chart. Open it in a browser; it needs neither a server nor an internet connection.
 - `results/analysis.csv`: calendar-aligned, long-format observations and calculated rates.
