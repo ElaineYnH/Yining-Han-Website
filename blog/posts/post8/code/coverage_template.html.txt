@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How often do simulated confidence intervals cover the truth?</title>
+<style>
+*{box-sizing:border-box}body{margin:0;color:#243746;background:#fff;font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+.explorer{max-width:960px;margin:0 auto;padding:16px;border:1px solid #d4e1de;border-radius:12px;background:#f7faf9}
+.controls{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:14px}.control{flex:1;min-width:160px}
+label{display:block;font-weight:650;font-size:13px;margin-bottom:5px}select{font:inherit;padding:8px 12px;width:100%;background:white;border:1px solid #9caeac;border-radius:6px;color:#243746}
+select:focus-visible{outline:3px solid #b0d9d1;outline-offset:2px}
+.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-bottom:10px}
+.metric{padding:9px 11px;background:#fff;border:1px solid #e0e9e7;border-radius:7px}.metric b{display:block;font-size:23px;font-weight:650}.metric span{display:block;font-size:12px;color:#435c61}
+.key{font-size:12px;margin:7px 0;color:#435c61}.key strong{display:inline-block;margin-right:12px}.hit{color:#18847b}.miss{color:#c44b36}
+picture,img{display:block;width:100%;height:auto}figure{margin:0;background:white;border-radius:7px;overflow:hidden}
+.note{font-size:12px;margin:8px 0 0;color:#435c61}.context{font-size:13px;margin:8px 0 0}
+@media(max-width:540px){.explorer{padding:10px}.controls{gap:8px}.control{min-width:120px}.metrics{gap:5px}.metric{padding:7px}.metric b{font-size:18px}.metric span{font-size:11px}}
+</style>
+</head>
+<body>
+<main class="explorer" aria-label="Interactive confidence interval coverage experiment">
+<div class="controls">
+  <div class="control"><label for="sample-size">People per simulated poll</label><select id="sample-size"><option value="50">50 people</option><option value="200" selected>200 people</option><option value="800">800 people</option></select></div>
+  <div class="control"><label for="confidence">Confidence level</label><select id="confidence"><option value="90">90%</option><option value="95" selected>95%</option><option value="99">99%</option></select></div>
+</div>
+<div class="metrics" aria-live="polite">
+  <div class="metric"><b id="rate"></b><span>Actual coverage</span></div>
+  <div class="metric"><b id="covered"></b><span>Intervals covering 55%</span></div>
+  <div class="metric"><b id="width"></b><span>Mean width, percentage points</span></div>
+</div>
+<p class="key"><strong class="hit">━━ Covers 55%</strong><strong class="miss">━━ Misses 55%</strong>Dashed line: fixed population truth.</p>
+<figure><picture><source id="mobile-source" media="(max-width:540px)"><img id="coverage-chart" width="1376" height="768" alt="" src="coverage_n200_c95.png"></picture></figure>
+<p class="context" id="interpretation"></p>
+<p class="note">All data are simulated. The plot shows the first {{SHOWN}} polls in generation order, with no selection. Coverage and mean width use all 5,000 fresh polls; each interval uses 2,000 bootstrap resamples. Settings display precomputed experiments, so results do not change randomly when a control is clicked.</p>
+</main>
+<script>
+'use strict';
+const metrics={{METRICS}};
+const size=document.getElementById('sample-size'), level=document.getElementById('confidence');
+function reportHeight(){parent.postMessage({type:'blog8-coverage-height',height:document.documentElement.scrollHeight},'*');}
+function update(){
+ const n=size.value,c=level.value,m=metrics[n][c];
+ document.getElementById('rate').textContent=(m.coverage*100).toFixed(1)+'%';
+ document.getElementById('covered').textContent=m.covered.toLocaleString('en-US')+' / 5,000';
+ document.getElementById('width').textContent=m.mean_width_pp.toFixed(1);
+ const chart=document.getElementById('coverage-chart');
+ document.getElementById('mobile-source').srcset='coverage_n'+n+'_c'+c+'_mobile.png';
+ chart.src='coverage_n'+n+'_c'+c+'.png';
+ chart.alt='First {{SHOWN}} simulated '+c+'% confidence intervals for polls of '+n+' people. Green intervals cover the fixed 55% population support; red intervals miss it. Overall coverage is '+(m.coverage*100).toFixed(1)+'% across 5,000 polls.';
+ document.getElementById('interpretation').textContent='At n = '+n+', '+c+'% intervals cover the true 55% support in '+(m.coverage*100).toFixed(1)+'% of these repeated polls. Their mean width is '+m.mean_width_pp.toFixed(1)+' percentage points.';
+ reportHeight();
+}
+size.addEventListener('change',update);level.addEventListener('change',update);
+document.getElementById('coverage-chart').addEventListener('load',reportHeight);
+new ResizeObserver(reportHeight).observe(document.querySelector('main'));
+window.addEventListener('resize',reportHeight);update();
+</script>
+</body>
+</html>

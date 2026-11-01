@@ -1,0 +1,82 @@
+BLOG 8 RUBRIC EVIDENCE AND VERIFICATION
+
+This is an internal replication note, not an additional blog article.
+Publication date: 2026-10-31, verified America/New_York date.
+Source repository snapshot: 635eca4cf4ec327519ad966a19d1be2c913ac9ff.
+
+1. Question and motivation
+   blog8.qmd opening asks what a simulated 53% poll tells us about a population
+   even split. The sample size and uncertainty have a concrete interpretation.
+2. Clear explanation
+   Three linked sections explain resampling, new polls versus resamples,
+   long-run coverage, and testing a specified null in undergraduate language.
+3. Interpretation and takeaway
+   Numeric CI, coverage, widths, null rejection rate and p-value are interpreted.
+   Failure to reject is explicitly distinguished from establishing a true null.
+4. Data and presentation
+   Simulation status is explicit. SOURCES.txt and the README document every
+   parameter. Three substantive figures carry the argument; mobile plots exist.
+5. Repository organization
+   code/, data/, results/, requirements.txt, and README.md contain complete
+   replication materials. The article links directly to those materials.
+6. Reproducibility and coding practices
+   Fixed separated random streams, generated CSV/JSON outputs and templates
+   insert numerical results programmatically. The existing article date is
+   preserved during regeneration.
+7. Bootstrap distribution
+   bootstrap_means() literally resamples the observed responses with replacement
+   20,000 times. Figure 1 shows the resulting distribution and percentile CI.
+8. Approximately 95% coverage
+   coverage_experiment() draws 5,000 NEW polls for every n, creates a fresh
+   2,000-resample distribution for EACH poll, and checks known truth 0.55.
+   Figure 2 displays unselected intervals and the all-poll coverage count.
+9. Test statistic under the null
+   null_experiment() simulates 50,000 new polls with p=0.50, independently of the
+   original p=0.55 model. The statistic is the support share.
+10. Rejection regions and p-values with visualization
+    Figure 3 shows the same null histogram twice: predefined two-sided 5%
+    rejection regions above, observed-result tail areas below. Boundary ties,
+    discreteness, Monte Carlo correction, and the interpretation are correct.
+
+Extra prompt recommendation: Figure 2 permits changing n and confidence level;
+precomputed experiments update both the displayed intervals and the summary.
+
+VALIDATION RECORD
+1. The Python builder ran twice successfully with the same fixed design.
+   Article date preservation was checked on the second build. Approximate
+   article length: 729 English words excluding metadata, plots and captions.
+2. verify_results.py passed for all three sample sizes. It recalculated
+   percentile endpoints, coverage flags/counts/widths and Monte Carlo p-values
+   from the saved draws, compared coverage with the infinite-bootstrap
+   Bernoulli calculation, and checked p-values against exact binomial tails.
+3. Full website command `quarto render` succeeded, rendering all 13 inputs
+   including all eight blog posts, the blog listing and the existing R example.
+   Validation environment: Quarto 1.8.27; R 4.3.3 with knitr/rmarkdown.
+   Existing source files and workflow were not modified.
+4. Chromium 151.0.7922.34 tested all nine sample-size/confidence combinations.
+   Displayed coverage counts, rates and widths matched the generated JSON.
+   The changing PNG resources loaded successfully for every setting.
+5. Desktop and 390px mobile screenshots were visually inspected. Plot title
+   overlap and long mobile axis labels found in the first draft were corrected.
+   Final checks found no horizontal overflow in the page or iframe. The
+   responsive iframe height and keyboard selection worked.
+6. The standalone interactive explorer worked via file://, requested only
+   local files and required no server or internet connection. The site-wide
+   external font/MathJax assets were blocked during browser checks; their CDN
+   availability was not tested. The explorer does not use these assets.
+7. All six relative article links to replication materials and the explorer
+   returned HTTP 200 in the rendered site. New-page JavaScript errors: none.
+8. The fully rendered blog listing showed exactly eight article entries and
+   one Blog 8 entry. No rubric, verification or template entry appeared.
+
+DEFAULT RESULTS
+200-person example: 106 supporters; estimate 53%; bootstrap CI 46%-60%.
+95% coverage: 4,783 of 5,000 (95.66%); 217 misses.
+Null tail count: 21,775 of 50,000; corrected simulated p = 0.4355113.
+Exact binomial p = 0.4367535. Critical counts: <=85 or >=115.
+Null rejection rate in the simulation: 3.966% (discrete two-sided 5% test).
+
+LIMITS
+This is a Bernoulli teaching model, not a real survey or a universal bootstrap
+coverage guarantee. No Canvas deadline was verified. No changes have been
+pushed to the user's repository; actual GitHub Pages deployment is not claimed.

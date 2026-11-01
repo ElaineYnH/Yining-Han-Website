@@ -1,0 +1,26 @@
+{
+  "simulation_only": true,
+  "model": "independent Bernoulli responses",
+  "true_population_support": 0.55,
+  "null_population_support": 0.5,
+  "seed": 640008,
+  "sample_sizes": [
+    50,
+    200,
+    800
+  ],
+  "confidence_levels": [
+    90,
+    95,
+    99
+  ],
+  "main_bootstraps": 20000,
+  "coverage_polls_per_size": 5000,
+  "bootstraps_per_coverage_poll": 2000,
+  "null_polls_per_size": 50000,
+  "displayed_intervals": 50,
+  "quantile_method": "numpy.quantile(method='linear')",
+  "sample_sha256": "eab040579250bf73e5e03bafe433c466c0fcb748a7598150f30e57683deedc80",
+  "numpy": "2.3.5",
+  "matplotlib": "3.10.8"
+}
