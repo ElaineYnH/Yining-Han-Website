@@ -39,15 +39,34 @@ The resamples reuse information; they do not create 20,000 new surveys. More boo
 To check coverage, I repeat the **whole survey**, not just its bootstrap. For each of 5,000 fresh polls, I construct a new percentile interval using 2,000 resamples of that poll. At 200 respondents, **4,783 intervals contain 55%: 95.7% coverage**. The other 217 miss it. Simulation noise alone contributes about 0.29 percentage points of standard error to this estimated coverage rate.
 
 ```{=html}
+<style>
+.blog8-print-coverage{display:none!important;}
+.blog8-print-coverage img{width:100%;height:auto;}
+@media print{
+ .blog8-live-coverage{display:none!important;}
+ .blog8-print-coverage{display:block!important;margin:1em 0;}
+}
+</style>
+<div class="blog8-live-coverage">
 <iframe id="blog8-coverage" src="results/coverage_explorer.html" title="Explore confidence interval coverage by sample size and confidence level" style="width:100%;height:790px;border:0;display:block;" loading="eager"></iframe>
+</div>
+<figure class="blog8-print-coverage">
+<img src="results/coverage_n200_c95.png" alt="First 50 simulated 95% intervals at n=200. Green intervals contain 55% population support; red intervals miss it.">
+</figure>
 <script>
-window.addEventListener('message',function(event){
-  const frame=document.getElementById('blog8-coverage');
-  if(frame && event.source===frame.contentWindow && event.data && event.data.type==='blog8-coverage-height'){
-    const height=Number(event.data.height);
-    if(Number.isFinite(height) && height>0)frame.style.height=Math.max(400,Math.min(1800,Math.ceil(height)+8))+'px';
+(function(){
+ const frame=document.getElementById('blog8-coverage');
+ window.addEventListener('message',function(event){
+  if(event.source!==frame.contentWindow || !event.data || event.data.type!=='blog8-coverage-height')return;
+  const height=Math.ceil(Number(event.data.height));
+  if(Number.isFinite(height) && height>=200 && height<=4000 && Math.abs(frame.getBoundingClientRect().height-height)>.5){
+   frame.style.height=height+'px';
   }
-});
+ });
+ const measure=()=>frame.contentWindow.postMessage({type:'blog8-measure-height'},'*');
+ frame.addEventListener('load',measure);
+ measure();
+})();
 </script>
 ```
 

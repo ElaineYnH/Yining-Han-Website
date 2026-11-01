@@ -38,7 +38,12 @@ picture,img{display:block;width:100%;height:auto}figure{margin:0;background:whit
 'use strict';
 const metrics={"50": {"90": {"n": 50, "confidence": 90, "covered": 4503, "polls": 5000, "coverage": 0.9006, "mcse": 0.004231303345306267, "mean_width_pp": 23.40138}, "95": {"n": 50, "confidence": 95, "covered": 4746, "polls": 5000, "coverage": 0.9492, "mcse": 0.003105458420265838, "mean_width_pp": 27.48090999999999}, "99": {"n": 50, "confidence": 99, "covered": 4923, "polls": 5000, "coverage": 0.9846, "mcse": 0.0017414270010540189, "mean_width_pp": 35.31934599999997}}, "200": {"90": {"n": 200, "confidence": 90, "covered": 4540, "polls": 5000, "coverage": 0.908, "mcse": 0.004087444189221425, "mean_width_pp": 11.514329999999998}, "95": {"n": 200, "confidence": 95, "covered": 4783, "polls": 5000, "coverage": 0.9566, "mcse": 0.002881542642405279, "mean_width_pp": 13.704542499999995}, "99": {"n": 200, "confidence": 99, "covered": 4955, "polls": 5000, "coverage": 0.991, "mcse": 0.0013355897573731246, "mean_width_pp": 17.898591999999987}}, "800": {"90": {"n": 800, "confidence": 90, "covered": 4495, "polls": 5000, "coverage": 0.899, "mcse": 0.004261431684305169, "mean_width_pp": 5.77298}, "95": {"n": 800, "confidence": 95, "covered": 4741, "polls": 5000, "coverage": 0.9482, "mcse": 0.0031342227106573, "mean_width_pp": 6.870792499999998}, "99": {"n": 800, "confidence": 99, "covered": 4942, "polls": 5000, "coverage": 0.9884, "mcse": 0.00151429455523026, "mean_width_pp": 8.979641124999995}}};
 const size=document.getElementById('sample-size'), level=document.getElementById('confidence');
-function reportHeight(){parent.postMessage({type:'blog8-coverage-height',height:document.documentElement.scrollHeight},'*');}
+function reportHeight(){
+ // Measure the content box. The document's scrollHeight is at least the
+ // iframe viewport height, so feeding it back makes the frame grow again.
+ const height=Math.ceil(document.querySelector('main').getBoundingClientRect().height);
+ if(height>0)parent.postMessage({type:'blog8-coverage-height',height},'*');
+}
 function update(){
  const n=size.value,c=level.value,m=metrics[n][c];
  document.getElementById('rate').textContent=(m.coverage*100).toFixed(1)+'%';
@@ -54,6 +59,9 @@ function update(){
 size.addEventListener('change',update);level.addEventListener('change',update);
 document.getElementById('coverage-chart').addEventListener('load',reportHeight);
 new ResizeObserver(reportHeight).observe(document.querySelector('main'));
+window.addEventListener('message',event=>{
+ if(event.source===parent && event.data && event.data.type==='blog8-measure-height')reportHeight();
+});
 window.addEventListener('resize',reportHeight);update();
 </script>
 </body>

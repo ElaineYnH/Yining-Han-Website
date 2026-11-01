@@ -42,7 +42,7 @@ Extra prompt recommendation: Figure 2 permits changing n and confidence level;
 precomputed experiments update both the displayed intervals and the summary.
 
 VALIDATION RECORD
-1. The Python builder ran twice successfully with the same fixed design.
+1. The Python builder ran successfully with the same fixed design.
    Article date preservation was checked on the second build. Approximate
    article length: 729 English words excluding metadata, plots and captions.
 2. verify_results.py passed for all three sample sizes. It recalculated
@@ -80,3 +80,24 @@ LIMITS
 This is a Bernoulli teaching model, not a real survey or a universal bootstrap
 coverage guarantee. No Canvas deadline was verified. No changes have been
 pushed to the user's repository; actual GitHub Pages deployment is not claimed.
+
+SPACING FIX AFTER PUBLICATION (2026-10-31, America/New_York)
+The original automatic height calculation used documentElement.scrollHeight,
+which includes the iframe viewport. Sending that height back with extra padding
+created a feedback loop and left excessive blank space on the WEB page.
+The earlier browser check established enough height, but missed excess height.
+
+The explorer now measures its main content box. The article sets the frame to
+that measured height only when it changes, and requests an initial measurement
+after the iframe loads. Both generation templates contain the correction.
+Browser printing uses a static default coverage plot; the interactive frame is
+hidden for print, without retaining its occupied space.
+
+Corrected Chromium checks passed all nine settings and viewport widths 390, 768,
+1280 and 1920px. Frame-to-content extra height was below 1px. Desktop frame
+height was 725px for 724.90625px of content; the caption followed after its normal
+17px margin. Waiting while idle did not increase the frame height. The print
+media fallback, keyboard controls, relative links, offline explorer and listing
+checks passed. No horizontal overflow or JavaScript errors were found.
+All CSV, JSON and PNG files are byte-identical to the original delivery; the
+article date, analysis and numerical conclusions were preserved.

@@ -14,6 +14,9 @@ The existing blog listing discovers it automatically. No changes to `_quarto.yml
 All results are precomputed. Rendering this post does not run Python or install
 additional R packages. The interactive figure uses local images and plain
 JavaScript, works offline, and needs no CDN, API key, or server-side process.
+The iframe follows the measured content height, including when its width changes.
+Browser printing uses the static n=200, 95% coverage plot to avoid reserving an
+interactive frame across printed pages.
 
 Expected article URL after a successful deployment:
 <https://elaineynh.github.io/Yining-Han-Website/blog/posts/post8/blog8.html>

@@ -38,7 +38,12 @@ picture,img{display:block;width:100%;height:auto}figure{margin:0;background:whit
 'use strict';
 const metrics={{METRICS}};
 const size=document.getElementById('sample-size'), level=document.getElementById('confidence');
-function reportHeight(){parent.postMessage({type:'blog8-coverage-height',height:document.documentElement.scrollHeight},'*');}
+function reportHeight(){
+ // Measure the content box. The document's scrollHeight is at least the
+ // iframe viewport height, so feeding it back makes the frame grow again.
+ const height=Math.ceil(document.querySelector('main').getBoundingClientRect().height);
+ if(height>0)parent.postMessage({type:'blog8-coverage-height',height},'*');
+}
 function update(){
  const n=size.value,c=level.value,m=metrics[n][c];
  document.getElementById('rate').textContent=(m.coverage*100).toFixed(1)+'%';
@@ -54,6 +59,9 @@ function update(){
 size.addEventListener('change',update);level.addEventListener('change',update);
 document.getElementById('coverage-chart').addEventListener('load',reportHeight);
 new ResizeObserver(reportHeight).observe(document.querySelector('main'));
+window.addEventListener('message',event=>{
+ if(event.source===parent && event.data && event.data.type==='blog8-measure-height')reportHeight();
+});
 window.addEventListener('resize',reportHeight);update();
 </script>
 </body>
