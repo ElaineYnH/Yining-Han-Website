@@ -1,0 +1,67 @@
+Classroom specification and shared evaluation repairs
+
+The article's "Class model" is a Python XGBoost port of the supplied R program.
+It preserves the 95-equity universe, 14 numeric predictors, target, fixed
+pre-2024 training cutoff and 300-tree/depth-5/0.05-learning-rate specification.
+It is not represented as a bit-for-bit reproduction of a historical classroom
+run: data vendor revisions, R/Python interfaces and engine versions can differ.
+The original R program is retained verbatim for inspection.
+
+Predictors: open, high, low, close, volume, adjusted, return, spy_ret,
+mom_1m, mom_3m, mom_6m, vol_1m, ret_5d, excess_ret. date and symbol have ID roles.
+The original recipe(target ~ .) includes raw OHLCV and adjusted-price levels;
+limiting the baseline to just the six engineered signals would change the model.
+
+Original ratios are P[t-21]/P[t-1]-1, P[t-63]/P[t-1]-1,
+P[t-126]/P[t-1]-1 and P[t-5]/P[t-1]-1. They encode inverse price growth.
+This is preserved in the baseline, rather than silently changing signs/direction.
+The revision uses conventional growth ratios, additional dimensionless features,
+same-date cross-sectional ranks and more regularized, shallower trees. Inverting
+an existing ratio does not itself create new information.
+
+R slider .before=21 on lagged return includes 22 observations, using sample SD.
+The Python baseline reproduces that window and ddof=1.
+
+R -> XGBoost: trees=300 -> n_estimators=300; tree_depth=5 -> max_depth=5;
+learn_rate=.05 -> learning_rate=.05; loss_reduction=0 -> gamma=0;
+min_n=10 -> min_child_weight=10. mtry=NULL uses all predictors, and the default
+sample fraction is one. L2 penalty is the engine default 1. Python engine is
+XGBoost 3.1.1, squared-error regression, CPU histogram trees, one thread, seed123.
+
+The target is exactly P[t+20]/P[t+1]-1. Despite the classroom label "20-day
+return", there are 19 daily close-to-close intervals between these endpoints.
+Prediction occurs after the signal day's close; execution is next session close.
+
+Common repairs, applied to BOTH baseline and revision:
+1. Label purging: a training observation's label END must precede evaluation.
+   A date-only split otherwise allows late-2023 training returns to use 2024 prices.
+   Final training signals end 2023-11-30; their labels end by 2023-12-29.
+2. Chronological tuning: the revised candidate grid is frozen in analysis_design.
+   Three validation windows in 2023 choose parameters. Each fold's training labels
+   end before its validation starts; validation labels finish before the window
+   ends. The final 2024+ test is never used for selection or refitting.
+3. Aligned realized returns: the R script compounds per-signal 19-interval targets
+   while SPY uses different calendar-month endpoints. Here both strategies and
+   benchmarks are marked daily over the SAME next-session monthly holding windows.
+   Forecast evaluation retains the exact classroom target, while portfolio holding
+   periods run until the following monthly execution (their length varies).
+4. Start both strategy and SPY wealth at $100 over the identical test window;
+   do not compare a 2024 strategy curve with a SPY curve compounded since 2022.
+5. Daily frequency for annualization: use sqrt(252) on DAILY net returns, not on
+   monthly observations. No CAPM alpha is claimed. Zero-rate Sharpe is explicitly
+   identified; CAGR uses elapsed calendar years.
+6. Include initial purchase, all monthly trades and final liquidation costs.
+   Transaction costs are scenarios (0,10,25 one-way basis points), not observed
+   brokerage quotes. Dollar trades are solved self-financing after costs.
+
+Both model portfolios select the ten largest predictions and normalize clipped
+positive predicted returns; if every selected forecast is nonpositive, they use
+equal weights. There is no test-driven alternative allocation rule for the revision.
+SPY buy-and-hold and all-95 monthly equal weighting supply investment benchmarks.
+
+Interpretation limits: one selected large-company universe, one historical test
+window, present-vintage vendor adjustments, no delisted securities, no historical
+universe reconstruction, no tax model, no causal identification. Overlapping
+forward labels and correlated stocks reduce the independent information content.
+The descriptive uncertainty calculation resamples 20-date blocks with all stocks
+together; it does not certify future returns or remove universe-selection bias.

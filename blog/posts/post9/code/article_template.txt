@@ -1,0 +1,75 @@
+---
+title: "Better Forecasts, Worse Portfolios"
+author: "Yining Han"
+date: @@publication_date@@
+description: "Revising a classroom stock model reduces prediction error, but its investment results tell a different story."
+categories: [Machine Learning, Stock Returns, Gradient Boosting]
+image: results/wealth.png
+image-alt: "Growth of $100 in two model portfolios, equal-weighted stocks, and SPY, after trading costs."
+format: html
+resources:
+  - README.md
+  - requirements.txt
+  - code/**
+  - data/**
+  - results/**
+---
+
+Can reducing a stock model's prediction error make it a better investment strategy? I revisited our classroom gradient-boosting experiment to find out. My revision made forecasts more accurate than the class specification, yet its portfolio earned less. It also failed to beat a simple average-return forecast.
+
+## Revisiting the classroom experiment
+
+The [shared classroom results](https://docs.google.com/document/d/1Busi9v-ibPt8WwThnLs94uK7Tz-XDa5EOc6cLDt3nvQ/edit) were mixed: some portfolios labeled “with analysis” finished above their counterparts, others below. The sheet lacks dates, initial balances, and risk measures, so it cannot establish an investment advantage. A controlled historical comparison is more informative.
+
+The [original program](code/original_class_model.R) downloads 95 large-company stocks and SPY from Yahoo Finance. It trains XGBoost on pre-2024 observations, then ranks stocks by predicted future returns. Gradient boosting combines decision trees, each helping correct previous errors. The class model uses 300 trees, depth five, and a 0.05 learning rate, with prices, volume, momentum, volatility, and market-relative returns as predictors.
+
+I used a real [Yahoo Finance snapshot](data/manifest.json) covering January 2022–November 2026. The original target is the price change from the next session's close to the twentieth session's close: **19 daily return intervals**. Both model portfolios select the ten highest forecasts and weight positive predictions proportionally, falling back to equal weights if all ten are nonpositive.
+
+## Improving the model without peeking
+
+My revision replaces price levels with scale-free signals, including conventional momentum, market-relative returns, volume changes, and within-date stock ranks. Shallower trees and stronger penalties aim to reduce overfitting. Twelve parameter combinations were compared in three chronological validation windows during 2023. The selected model uses @@best_trees@@ trees of depth @@best_depth@@, learning rate 0.03, and an L2 penalty of @@best_lambda@@. Nothing from the 2024 onward test period selected these settings.
+
+A date cutoff alone is insufficient: a December training observation's future-return label can extend into January. I therefore require every training label to finish before evaluation begins. Both models use this same repair. The “class model” below is a Python port of the original specification, with shared evaluation corrections documented in the [audit](code/CLASS_MODEL_AUDIT.txt).
+
+The untouched test contains **@@n_test@@ stock-date forecasts across @@test_dates@@ dates**. Root mean squared error (RMSE) measures typical forecast mistakes and penalizes large misses. A constant forecast equal to the training sample's mean return provides the simple benchmark.
+
+```{=html}
+<figure>
+<picture><source media="(max-width:540px)" srcset="results/forecast_error_mobile.png"><img src="results/forecast_error.png" alt="Forecast error for the training mean, original class specification, and revised model. Lower RMSE is better." style="width:100%;height:auto;"></picture>
+<figcaption>Figure 1. Same stocks, targets, and test dates: @@first_test@@–@@last_test@@. RMSE is measured in percentage points.</figcaption>
+</figure>
+```
+
+RMSE falls from **@@original_rmse@@ to @@improved_rmse@@ percentage points**, but the constant forecast achieves **@@mean_rmse@@**. Relative to that benchmark, the revised model's out-of-sample R-squared is @@improved_r2@@: it still makes larger squared errors overall.
+
+Returns are difficult to predict because information arriving after a forecast changes prices, and historical relationships need not persist. Flexible models can fit noise. Moreover, correlated stocks and overlapping return windows mean thousands of rows contain less independent evidence than their count suggests.
+
+## What happened to $100?
+
+Investment results use monthly signals, executed at the following session's close and held until the next monthly execution. These realized holding windows vary in length; they are distinct from the fixed forecast target. All strategies share **@@holding_periods@@ completed periods**, @@portfolio_start@@–@@portfolio_end@@, with dividends reflected in adjusted prices.
+
+```{=html}
+<figure>
+<picture><source media="(max-width:540px)" srcset="results/wealth_mobile.png"><img src="results/wealth.png" alt="Daily growth of $100 over identical holding dates, after ten basis points per dollar traded. The class model finishes above the revised model and passive benchmarks." style="width:100%;height:auto;"></picture>
+<figcaption>Figure 2. Costs of 0.10% per dollar bought or sold include initial entry, monthly trades, and final liquidation. The 95-stock benchmark rebalances monthly; SPY is buy-and-hold.</figcaption>
+</figure>
+```
+
+After those costs, $100 becomes **$@@original_wealth@@** with the class model, **$@@improved_wealth@@** with the revision, and **$@@spy_wealth@@** in SPY. Forecast error averages all stocks; investment returns depend on the selected ten, their weights, and the path of returns. Improving one objective need not improve the other.
+
+| Strategy | Annualized return | Sharpe ratio* | Maximum drawdown |
+|:--|--:|--:|--:|
+| Class model | @@original_cagr@@ | @@original_sharpe@@ | @@original_drawdown@@ |
+| Revised model | @@improved_cagr@@ | @@improved_sharpe@@ | @@improved_drawdown@@ |
+| Equal-weight 95 | @@equal_weight_cagr@@ | @@equal_weight_sharpe@@ | @@equal_weight_drawdown@@ |
+| SPY buy-and-hold | @@spy_cagr@@ | @@spy_sharpe@@ | @@spy_drawdown@@ |
+
+*Sharpe uses daily net returns, annualized with a zero risk-free rate. Drawdown measures the largest fall from a previous wealth peak.*
+
+The revision's small return advantage over SPY accompanies a lower Sharpe ratio and deeper drawdown. At 0.25% trading costs, it ends at **$@@improved_25bps_wealth@@**, below SPY's **$@@spy_25bps_wealth@@**. Costs matter because the model trades much more frequently.
+
+**The takeaway:** the revision improved the class model's forecasts, but did not establish a useful investment improvement. Even the original portfolio's strong result comes from one window and a selected stock universe. Present-day stock selection and revised vendor prices limit claims about a strategy that could actually have been implemented then.
+
+## Code and replication
+
+The [README](README.md) explains the complete workflow. The [Python script](code/build_blog9.py), [frozen design](data/analysis_design.json), [forecast metrics](results/forecast_metrics.csv), [investment metrics](results/investment_metrics.csv), and [independent checks](code/verify_results.py) reproduce this analysis. [XGBoost's documentation](https://xgboost.readthedocs.io/en/stable/parameter.html) explains the model parameters. All figures and empirical results use the supplied real-data snapshot.

@@ -1,0 +1,121 @@
+{
+  "frozen_before_test_run": true,
+  "seed": 123,
+  "test_start": "2024-01-01",
+  "cv_windows": [
+    [
+      "2023-04-01",
+      "2023-07-01"
+    ],
+    [
+      "2023-07-01",
+      "2023-10-01"
+    ],
+    [
+      "2023-10-01",
+      "2024-01-01"
+    ]
+  ],
+  "target": "adjusted[t+20]/adjusted[t+1]-1 (19 close-to-close daily intervals)",
+  "common_purge": "For each split, every training label must end strictly before the first validation/test date. Validation labels must end before the validation window end.",
+  "original_parameters": {
+    "n_estimators": 300,
+    "max_depth": 5,
+    "learning_rate": 0.05,
+    "gamma": 0,
+    "min_child_weight": 10,
+    "subsample": 1.0,
+    "colsample_bytree": 1.0,
+    "colsample_bynode": 1.0,
+    "reg_lambda": 1.0,
+    "reg_alpha": 0.0
+  },
+  "improved_common_parameters": {
+    "learning_rate": 0.03,
+    "gamma": 0,
+    "min_child_weight": 20,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "reg_alpha": 0.0
+  },
+  "improved_grid": [
+    {
+      "max_depth": 2,
+      "n_estimators": 150,
+      "reg_lambda": 5.0
+    },
+    {
+      "max_depth": 2,
+      "n_estimators": 150,
+      "reg_lambda": 20.0
+    },
+    {
+      "max_depth": 2,
+      "n_estimators": 300,
+      "reg_lambda": 5.0
+    },
+    {
+      "max_depth": 2,
+      "n_estimators": 300,
+      "reg_lambda": 20.0
+    },
+    {
+      "max_depth": 2,
+      "n_estimators": 600,
+      "reg_lambda": 5.0
+    },
+    {
+      "max_depth": 2,
+      "n_estimators": 600,
+      "reg_lambda": 20.0
+    },
+    {
+      "max_depth": 3,
+      "n_estimators": 150,
+      "reg_lambda": 5.0
+    },
+    {
+      "max_depth": 3,
+      "n_estimators": 150,
+      "reg_lambda": 20.0
+    },
+    {
+      "max_depth": 3,
+      "n_estimators": 300,
+      "reg_lambda": 5.0
+    },
+    {
+      "max_depth": 3,
+      "n_estimators": 300,
+      "reg_lambda": 20.0
+    },
+    {
+      "max_depth": 3,
+      "n_estimators": 600,
+      "reg_lambda": 5.0
+    },
+    {
+      "max_depth": 3,
+      "n_estimators": 600,
+      "reg_lambda": 20.0
+    }
+  ],
+  "selection": "Lowest pooled out-of-sample MSE across the three pre-2024 validation windows; deterministic grid-order tie break.",
+  "final_models": "Frozen after training on the common purged pre-2024 sample; no test-period refitting or retuning.",
+  "forecast_benchmark": "Constant mean target estimated on the same purged final training sample. Zero-return metrics also saved as a sensitivity.",
+  "portfolio": "Signal on first trading day of each month; execute at next trading day adjusted close. Select top 10, clip predicted returns below zero and normalize; equal weight if all 10 are nonpositive. Both models use the same rule. Hold until next monthly execution. Use only completed monthly holding intervals.",
+  "portfolio_benchmarks": [
+    "SPY buy and hold",
+    "All 95 equities equal weighted, monthly rebalanced"
+  ],
+  "transaction_cost_bps_one_way": [
+    0,
+    10,
+    25
+  ],
+  "transaction_cost_details": "Solve post-trade wealth + c*sum(abs(target_dollar_positions - pretrade_dollar_positions)) = pretrade_wealth. Include initial entry and final liquidation. No taxes, financing or cash interest.",
+  "risk_metrics": "Daily net returns; Sharpe uses zero risk-free rate and sqrt(252). CAGR uses elapsed calendar years. Max drawdown includes initial capital.",
+  "uncertainty": "Paired forecast MSE difference, aggregate cross-sectional losses by date, moving-block bootstrap with 20-date blocks, 2000 replications; descriptive conditional on this chosen universe/window.",
+  "data_sha256": "c191ca4c2edd7bf1168e918bf3f51d8b62a7d8e812cb5c6c0fd190c36cddda70",
+  "original_source_sha256": "e9105591098087d63f6f577961b54bf0eca185ed7839d46148e1c4282ad5739c"
+}

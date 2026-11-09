@@ -1,0 +1,9 @@
+{
+  "improved_minus_original_mse": -0.0008047059313431473,
+  "block_dates": 20,
+  "replications": 2000,
+  "descriptive_95_interval": [
+    -0.001140033330024887,
+    -0.0005537310442886206
+  ]
+}

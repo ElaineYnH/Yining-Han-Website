@@ -1,0 +1,34 @@
+Blog 9 data and method sources
+
+1. Uploaded real market data: blog9_market_data.zip, supplied by the author after
+   running blog9_download_data.ipynb in Google Colab. Provider: Yahoo Finance,
+   obtained via yfinance 0.2.66 with auto_adjust=False, repair=False, keepna=True.
+   https://finance.yahoo.com/
+   https://ranaroussi.github.io/yfinance/reference/api/yfinance.download.html
+   Downloaded 2026-11-09 03:15 UTC (2026-11-08 22:15 America/New_York).
+   Raw data span 2022-01-03 through 2026-11-06: 1,217 dates x 96 symbols.
+   prices.csv and download_quality.csv preserve the uploaded bytes exactly.
+   manifest.json preserves the original coverage, package versions and checksums.
+   The universe is the instructor's 95 named equities plus SPY, not the historical
+   membership of a comprehensive or survivorship-free stock index.
+
+2. Original classroom program: UPenn_XGBoostStockPrediction copy.R, provided in
+   the author's course materials. Preserved verbatim as code/original_class_model.R.
+   See code/CLASS_MODEL_AUDIT.txt for the Python-port mapping and common repairs.
+
+3. Shared class sheet, Stock Portfolio Results:
+   https://docs.google.com/document/d/1Busi9v-ibPt8WwThnLs94uK7Tz-XDa5EOc6cLDt3nvQ/edit
+   Accessed 2026-11-08 America/New_York. Only aggregated pair counts are retained
+   in classroom_context.json; individual reported balances are not republished.
+   Nine rows have both balances: the second is larger in six, smaller in three.
+   One unpaired row is excluded. No dates, initial balances, costs or trading
+   rules are given, so the sheet is contextual evidence, not model validation.
+
+4. XGBoost parameters and regularization (official documentation):
+   https://xgboost.readthedocs.io/en/stable/parameter.html
+   https://parsnip.tidymodels.org/reference/details_boost_tree_xgboost.html
+   The latter documents min_n -> min_child_weight and the other R parameter maps.
+
+All reported empirical returns, predictions and figures are computed from the
+uploaded real data. The block bootstrap only resamples observed forecast losses;
+it does not generate or substitute stock prices. No generated market data are used.

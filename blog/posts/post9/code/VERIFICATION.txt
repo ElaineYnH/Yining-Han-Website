@@ -1,0 +1,79 @@
+Blog 9 rubric evidence and verification record
+
+This is an evidence checklist, not a promise of a particular grade.
+
+COMMON CRITERIA
+1. Question/motivation: opening asks whether reducing forecast error improves an
+   investment strategy. The discrepancy between forecast and portfolio results
+   answers a concrete question relevant to evaluating stock-prediction models.
+2. Explanation: the article explains boosting, RMSE, the forecast benchmark,
+   chronology, the original forward target, portfolio formation and costs.
+3. Interpretation/takeaway: the revision reduces RMSE relative to the class model,
+   fails to beat a training-mean forecast and earns less than the class portfolio.
+   Its small net advantage over SPY at 10bps comes with worse Sharpe/drawdown and
+   disappears at 25bps. No causal or future-return claim is made.
+4. Data/presentation: source files, manifest, dates, sample counts and SHA-256
+   checks are retained. Two PNG figures and a risk/return table directly support
+   the same question. Units, return windows, costs and the Sharpe convention
+   are labeled. Separate smaller-screen figures avoid compressed text.
+5. Organization: code/, data/, results/ and README.md with exact replication and
+   website installation commands. The sole article is blog9.qmd. Notes and
+   templates use .txt, not additional renderable Markdown files.
+6. Reproducibility: full Python build actually completed. It regenerates the
+   article, forecasts, validation results, models, weights, daily equity curves,
+   metrics and figures from the unchanged real-data snapshot. Parameters and
+   evaluation rules were fixed before the first test run. Independent checks run.
+
+BLOG 9 CRITERIA
+7. Original experiment: article section 1, original_class_model.R and the mapping
+   audit explain the provided classroom model and original signals, universe,
+   target and portfolio. Mixed classroom balances are contextual, not presented
+   as controlled XGBoost evidence. The article discusses noisy/changing returns,
+   overfitting, correlated stocks and overlapping target windows.
+8. Substantive revision: 21 scale-free/ranked predictors, shallower trees,
+   penalties and 12 hyperparameter combinations. Three chronological, purged
+   2023 validation windows select depth2, 150trees, learning_rate0.03, lambda20.
+9. Out-of-sample comparison: common purged pre-2024 training sample; 66,120 test
+   forecasts across 696 dates. Both the classroom specification and revised
+   model are compared to a constant training-mean forecast, with an additional
+   zero-return sensitivity. Test data never select parameters or refit models.
+10. Predictive/economic performance: RMSE, MAE, OOS R-squared, direction accuracy
+    and daily rank correlation are saved. Common daily, self-financing portfolios
+    with identical execution dates compare both models, SPY buy-and-hold and
+    monthly equal weighting of the 95-stock universe. Gross, 10bps and 25bps
+    cases include entry/exit costs. Net CAGR, daily Sharpe and max drawdown
+    show why improved forecast error does not establish investment usefulness.
+
+ACTUALLY COMPLETED
+- Uploaded prices and coverage files match the original manifest's SHA-256.
+- All 116,832 real observations present: 96symbols x 1,217dates, no missing,
+  duplicated or nonpositive price records. No synthetic market data are used.
+- All 36 validation fits and both final models run using the saved design.
+- Independent verify_results.py passes all 66,120 forward-label reconstructions,
+  validation/training boundaries, selected CV candidate, 34 holding intervals,
+  period-return identities for all gross strategies, exact closed-form SPY net
+  costs, daily wealth compounding and independent forecast-error calculations.
+- Desktop/mobile PNGs generated and mobile charts visually inspected.
+- Main prose approximately 686 English words excluding figures and the table;
+  about 646 words before the code/replication paragraph.
+- Publication date checked via current UTC-05:00 time as 2026-11-08, 22:27 EST.
+
+WEBSITE VERIFICATION
+- Quarto 1.10.19 rendered all 13 pages not requiring the existing R demo,
+  including the new article and the complete blog listing, successfully.
+- Project inspection sees exactly one new render input: post9/blog9.qmd.
+- The blog listing has 9 real post titles, including this title exactly once.
+  No internal checklist/template is rendered or listed as another article.
+- All 17 local links/image references in the rendered article resolve to existing
+  published-output files. Both desktop/mobile PNG pairs are included.
+- The new article contains no iframe or fixed-height placeholder. Image height
+  follows intrinsic aspect ratio; standalone desktop and mobile plots inspected.
+- Full project render was attempted; the unchanged about.qmd template stops it
+  because this local environment lacks Rscript. The existing GitHub Actions
+  already installs R. No R-dependent source or workflow was changed.
+- Browser layout verification was not completed: the local browser process could
+  not launch, and the cloud browser could not reach this local preview. Static
+  HTML/resource checks and direct figure inspection are not claimed as browser
+  testing or verification of a live deployment.
+- No GitHub push or deployment has been performed.
+

@@ -1,0 +1,13 @@
+{
+  "source_url": "https://docs.google.com/document/d/1Busi9v-ibPt8WwThnLs94uK7Tz-XDa5EOc6cLDt3nvQ/edit",
+  "source_title": "Stock Portfolio Results",
+  "columns": [
+    "Portfolio 1 (without analysis)",
+    "Portfolio 2 (with analysis)"
+  ],
+  "complete_pairs": 9,
+  "second_balance_higher": 6,
+  "second_balance_lower": 3,
+  "unpaired_rows_excluded": 1,
+  "limitations": "The sheet does not document starting balances, dates, trading rules, risk, or costs; it is not a formal test of the XGBoost model."
+}
