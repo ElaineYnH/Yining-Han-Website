@@ -1,0 +1,6 @@
+group,columns,increase_in_MAE,repeat_SD,repeats
+Recent rentals,rentals_24h_ago;rentals_168h_ago;same_hour_mean_7days;previous_day_total;previous_7day_mean_total,160.35978328714015,2.8826751793419345,20
+Calendar,weekday;month;holiday;workingday,6.778072314944064,0.4380640117312465,20
+Hour of day,hour,2.204938519544047,0.12275708754874778,20
+Previous-day weather,previous_day_temp;previous_day_humidity;previous_day_wind;previous_day_weather,0.29051308157483857,0.14988834699487907,20
+Time trend,days_since_start,0.0,0.0,20

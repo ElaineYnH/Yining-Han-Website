@@ -1,0 +1,10 @@
+{
+  "test_targets_match_unmodified_source": true,
+  "weekly_rule_uses_exact_calendar_lag": true,
+  "all_test_metrics_recomputed_from_saved_predictions": true,
+  "all_validation_windows_precede_test": true,
+  "selected_model_minimizes_validation_MAE": true,
+  "changing_future_counts_and_weather_does_not_change_day_ahead_inputs": true,
+  "predictor_allow_list_excludes_targets_and_contemporaneous_weather": true,
+  "n_test": 2101
+}

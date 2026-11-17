@@ -1,0 +1,38 @@
+{
+  "forecast_origin": "End of previous calendar day; all 24 next-day hourly forecasts",
+  "test_design": "Fixed models; history updated daily using only already observed rentals/weather",
+  "test_start": "2012-10-01",
+  "test_end": "2012-12-31",
+  "selected_model": "Random forest",
+  "interpreted_model": "Random forest",
+  "MAE_reduction_vs_weekly_percent": 20.364171154492837,
+  "workingday_peak_hours": [
+    7,
+    8,
+    9,
+    16,
+    17,
+    18,
+    19
+  ],
+  "peak_hour_MAE": 86.12194833831012,
+  "peak_hour_weekly_MAE": 117.01965601965603,
+  "peak_hour_n": 407,
+  "article_values": {
+    "selected": "Random forest",
+    "n_test": "2,101",
+    "n_development": "14,847",
+    "n_retained": "16,948",
+    "n_excluded": "431",
+    "n_unrecorded": "165",
+    "chosen_mae": "55.3",
+    "chosen_rmse": "89.2",
+    "weekly_mae": "69.5",
+    "improvement": "20",
+    "peak_mae": "86.1",
+    "peak_weekly_mae": "117.0",
+    "top_group": "recent rentals",
+    "top_importance": "160.4",
+    "interpreted": "Random forest"
+  }
+}

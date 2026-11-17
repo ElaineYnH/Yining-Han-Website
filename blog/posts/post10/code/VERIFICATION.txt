@@ -1,0 +1,114 @@
+BLOG 10 — RUBRIC EVIDENCE AND VALIDATION
+
+Documents read before implementation:
+  Blog_posts_project_memory.md, current project record.
+  Blog_Posts (1)(1).pdf, Blog Post 10 prompt.
+  blog_post_rubric.pdf, six common criteria and four Post 10 criteria.
+
+COMMON CRITERIA
+
+1. Question and motivation
+   Opening: can ML beat a credible weekly rule for next-day hourly bike rentals?
+   Practical use: planning busy service hours. System-level completed rentals
+   are distinguished from unmet demand and station inventory needs.
+
+2. Clear explanation
+   Plain-language descriptions of forest averaging, sequential boosting, the
+   day-ahead information set, chronological validation, MAE, and RMSE.
+   Main narrative: approximately 654 words excluding headings, figures/captions,
+   the score table, and the collapsed replication/source note.
+
+3. Interpretation and takeaway
+   Held-out MAE falls from 69.5 to 55.3 rentals/hour, about 20%. The narrative
+   includes peak-hour errors and a large Sunday miss in the fixed example
+   week. The chosen model follows earlier validation, where its advantage was
+   small; the article does not claim lasting or current operational superiority.
+
+4. Data and presentation
+   Official UCI source, dataset DOI, source study and attribution in article
+   and README. Original source CSVs and documentation included unmodified.
+   Three distinct figures: model error, a fixed test-week prediction example,
+   and grouped permutation importance. Desktop and mobile figure versions
+   have legible labels, units, explicit periods, captions and alt text.
+
+5. Repository organization
+   Separate code/, data/raw/, figures/ and results/, plus README.txt with exact
+   publishing and replication steps. All article resource links resolve in
+   the rendered site. Internal notes are .txt to avoid extra listed articles.
+
+6. Reproducibility and coding
+   build_blog.py implements ingestion, exact calendar lags, training-fold
+   preprocessing, tuning, selection, test predictions, scores, interpretation,
+   figures and article generation. Numeric values are substituted from saved
+   results. Fixed seed, package versions and complete raw inputs included.
+   Independent checks are supplied in audit_workflow.py.
+
+POST 10 CRITERIA
+
+7. Two machine-learning algorithms plus a simple benchmark
+   RandomForestRegressor and HistGradientBoostingRegressor, plus training-only
+   hour/workday means and the stronger exact t-168h weekly forecast.
+   All four algorithms/rules are evaluated on identical held-out observations.
+
+8. Proper train/test procedure and tuning without test data
+   Test reserved: October–December 2012, 2,101 recorded hours with usable lags.
+   Three expanding validation windows cover the preceding three quarters.
+   Eight forest and twelve boosting parameter sets; training-fold one-hot
+   encoding and disabled random internal early stopping. Model selection JSON
+   is written before test scores are calculated. Only forecast-time-available
+   inputs are used. No target components or future observed weather.
+
+9. Appropriate out-of-sample evaluation
+   MAE is the prespecified selection/primary score; RMSE describes larger misses.
+   Bias, every test prediction, fold scores, and errors by hour are saved.
+   Working-day 7–9 a.m. and 4–7 p.m. errors supplement the aggregate results.
+
+10. Interpretation and reason for model choice
+   Twenty grouped input permutations per group explain model reliance after
+   selection; correlated demand measures are shuffled together. The article
+   distinguishes predictive reliance from causal effects and warns about
+   unusual predictor combinations. Random forest is chosen by validation MAE.
+
+ACTUALLY COMPLETED
+
+- Full Python model workflow executed on the user's actual UCI ZIP contents.
+- 60 ML validation fits (8 x 3 forests and 12 x 3 boosting models), both simple
+  rules, and the two final ML refits completed. Base analysis took 157.6 seconds.
+- Data checks: unique timestamps, target-component identity, no missing source
+  cells, every hourly/daily total agreement, and raw-file SHA256 hashes.
+- All three original files checked byte-for-byte against the uploaded ZIP.
+- Independent recomputation of every model's test MAE, RMSE and bias from
+  saved predictions; test targets checked against the original hourly data.
+- Weekly rule independently checked against exact seven-day calendar lags.
+- Chronological folds and validation-only selection independently checked.
+- Future-data perturbation check: changing all future counts and weather leaves
+  the first target day's forecast inputs unchanged.
+- Figures inspected directly, including dedicated mobile versions.
+- Quarto 1.11.9 rendered all ten blog articles, their listing and the three
+  main site pages (14 pages) using a copy of the actual current repository.
+- Original root configuration, listing and deployment workflow inspected.
+- The new article has exactly one listing target. Its local code, data, score,
+  image and README links all resolve. No auxiliary Markdown pages are present.
+- The article contains no runtime R/Python chunks and needs no workflow change.
+
+VALIDATION SCOPE AND LIMITS
+
+The initial attempt to render the entire unmodified repository stopped at
+its pre-existing sample about.qmd because this runtime has no Rscript. That
+unchanged page was excluded only from the temporary local check; it is not
+modified or included in the delivery. All ten posts and all navigation-listed
+main pages rendered successfully. The user's existing Actions workflow already
+installs R. This is not a claim that the entire unmodified repository was built
+locally, or that a live deployment has been performed.
+
+A Chromium browser check could not run because process startup was blocked
+by this runtime's socket restriction. Plot images were inspected directly;
+resource and listing checks were performed on the actual rendered HTML.
+No browser-interaction or exact mobile page-layout success is claimed.
+
+No changes have been pushed to the user's GitHub repository. Publish by copying
+the supplied post10 folder into blog/posts/, then committing and pushing it.
+The course's exact current deadline was not confirmed. The article date uses
+the checked current America/New_York calendar date, 2026-11-16 (EST).
+
+This is evidence of the work and its scope, not a promise of a particular grade.

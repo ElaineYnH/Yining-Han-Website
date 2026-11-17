@@ -1,0 +1,26 @@
+[
+  {
+    "train_start": "2011-01-08 00:00:00",
+    "train_end": "2011-12-31 23:00:00",
+    "validation_start": "2012-01-01 00:00:00",
+    "validation_end": "2012-03-31 23:00:00",
+    "n_train": 8302,
+    "n_validation": 2159
+  },
+  {
+    "train_start": "2011-01-08 00:00:00",
+    "train_end": "2012-03-31 23:00:00",
+    "validation_start": "2012-04-01 00:00:00",
+    "validation_end": "2012-06-30 23:00:00",
+    "n_train": 10461,
+    "n_validation": 2178
+  },
+  {
+    "train_start": "2011-01-08 00:00:00",
+    "train_end": "2012-06-30 23:00:00",
+    "validation_start": "2012-07-01 00:00:00",
+    "validation_end": "2012-09-30 23:00:00",
+    "n_train": 12639,
+    "n_validation": 2208
+  }
+]

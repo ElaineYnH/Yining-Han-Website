@@ -1,0 +1,36 @@
+{
+  "raw_hourly_rows": 17379,
+  "raw_daily_rows": 731,
+  "first_timestamp": "2011-01-01 00:00:00",
+  "last_timestamp": "2012-12-31 23:00:00",
+  "unrecorded_hours_in_calendar_grid": 165,
+  "rows_excluded_for_unavailable_history": 431,
+  "rows_retained": 16948,
+  "excluded_by_year": {
+    "2011": 343,
+    "2012": 88
+  },
+  "target_components_excluded": [
+    "casual",
+    "registered"
+  ],
+  "contemporaneous_weather_excluded": [
+    "temp",
+    "atemp",
+    "hum",
+    "windspeed",
+    "weathersit"
+  ],
+  "hourly_daily_count_totals_match": true,
+  "sha256": {
+    "Readme.txt": "b92c8628622948bf0828c43a1b315d1517c3d7fd63654730d0dea379b8e88175",
+    "day.csv": "a6bcf826782d3c0fbfdcbeead17cd0884185a0dafe8ff10cd48a874ee7ba18be",
+    "hour.csv": "e03de4ee4ef4dc376ac6e04bf829673c6269e8eba5c60fa121640fa2f829504f"
+  },
+  "development_rows": 14847,
+  "test_rows": 2101,
+  "development_first": "2011-01-08 00:00:00",
+  "development_last": "2012-09-30 23:00:00",
+  "test_first": "2012-10-01 00:00:00",
+  "test_last": "2012-12-31 23:00:00"
+}
